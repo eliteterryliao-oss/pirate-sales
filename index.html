@@ -1,0 +1,3231 @@
+<!DOCTYPE html>
+<html lang="zh-TW"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIxNDE1MjEwNzg2OTM0MTkzMTUwNCIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjXzYwNjc2ZmY5MmU2MGFmMTBfaW5kZXguaHRtbC03MTEifSwiZXhwIjoxNzkzODUzODA2LCJpYXQiOjE3OTM4NTAyMDYsImFsZyI6IlJTMjU2In0.VwJgXFEA0LKkAE9rXZkUp3K7hrge09OE2JNnNTqAjEgaSHRWlndfaXGhYAzWnM5vZ4BRaJ8gQf_PFMv4XLJy3jT0_r8YIJXKLZlqwXggGwfeDxpo0HCPr-MFr0kwZixNFDE5_3Mwm5Fvd9cmdTaTI1gz87lqCnqmGg0hjGj_8_-4KfEikPxzLk5Uzm5b8YhWdApnAJczXfDkKcMdTttYRSbxmNSFE0pvKDnL2upibRUkFYpyVWZIE00GeSRNFlJVBgeVSvl9X8njipmvkinmGldYwYJp16onBvbUSz0ShBmflv6_97vxDKit_ydNfcrEP7Il_XyI0d076VNwM5FxHw","c_60676ff92e60af10_index.html-711")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.j=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.i="";var l=0,t=null,r=null,q=[],F=new TextEncoder,G=new TextDecoder;
+c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*16|0;return(f===
+"x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;(g=t)==null||g.postMessage(a)}};
+Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function() {
+  function normalizeSlug(str) {
+    try {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^p{L}p{N}s_-]/gu, '')
+        .replace(/s+/g, '-');
+    } catch (e) {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9s_-]/g, '')
+        .replace(/s+/g, '-');
+    }
+  }
+
+  function findTargetElement(hash) {
+    if (!hash || hash === '#') {
+      return null;
+    }
+    const rawId = hash.startsWith('#') ? hash.slice(1) : hash;
+    let decodedId = rawId;
+    try {
+      decodedId = decodeURIComponent(rawId);
+    } catch (e) {
+      // Ignore URI malformed errors.
+    }
+
+    // 1. Direct ID match (raw and decoded).
+    let target = document.getElementById(rawId) || document.getElementById(decodedId);
+    if (target) {
+      return target;
+    }
+
+    // 2. Name attribute match (<a name="...">).
+    try {
+      if (typeof CSS !== 'undefined' && CSS.escape) {
+        target =
+          document.querySelector('[name="' + CSS.escape(rawId) + '"]') ||
+          document.querySelector('[name="' + CSS.escape(decodedId) + '"]');
+      } else {
+        const namedElements = document.getElementsByName(rawId);
+        if (namedElements && namedElements.length > 0) {
+          return namedElements[0];
+        }
+      }
+    } catch (e) {
+      // Ignore querySelector syntax errors.
+    }
+    if (target) {
+      return target;
+    }
+
+    // 3. Match heading text by slug (for Markdown TOCs where headings lack explicit IDs).
+    const targetSlug = normalizeSlug(decodedId);
+    if (targetSlug) {
+      for (const heading of document.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
+        if (normalizeSlug(heading.textContent || '') === targetSlug) {
+          return heading;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  document.addEventListener('click', function(event) {
+    const target = event.target;
+    const anchor = target && typeof target.closest === 'function' ? target.closest('a') : null;
+    if (!anchor) {
+      return;
+    }
+
+    const href = anchor.getAttribute('href');
+    if (
+      !href ||
+      href.trim().toLowerCase().startsWith('javascript:') ||
+      anchor.hasAttribute('download')
+    ) {
+      return;
+    }
+
+    // Check if the link is an in-page hash / anchor link.
+    if (href.startsWith('#')) {
+      event.preventDefault();
+      const targetElement = findTargetElement(href);
+      if (targetElement) {
+        targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+      }
+      return;
+    }
+
+    // Check if the URL has the same origin/pathname but with a hash.
+    try {
+      const url = new URL(anchor.href, window.location.href);
+      if (
+        url.hash &&
+        url.origin === window.location.origin &&
+        url.pathname === window.location.pathname
+      ) {
+        event.preventDefault();
+        const targetElement = findTargetElement(url.hash);
+        if (targetElement) {
+          targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+        return;
+      }
+    } catch (e) {
+      // Fall through if URL parsing fails.
+    }
+
+    // For all external or full navigation links, prevent iframe-level navigation
+    // (which breaks in AGSA WebView or sandboxed iframes) and ensure they open
+    // safely in a new tab/window.
+    if (anchor.target !== '_blank') {
+      event.preventDefault();
+      window.open(anchor.href, '_blank', 'noopener,noreferrer');
+    }
+  }, {capture: true});
+})();</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>雙人奪寶戰：航海大冒險</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Phosphor Icons & Lucide support via unpkg -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" crossorigin="anonymous"></script>
+
+  <!-- Firebase Cloud Sync SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Global hooks for App
+    window.CloudSync = {
+      isReady: false,
+      docRef: null,
+      saveState: null,
+      authStatus: 'connecting'
+    };
+
+    try {
+      const appId = typeof __app_id !== 'undefined' ? __app_id : 'pirate-sales-quest-default';
+      const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+
+      if (firebaseConfig) {
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Sign in first
+        const initAuth = typeof __initial_auth_token !== 'undefined' && __initial_auth_token
+          ? signInWithCustomToken(auth, __initial_auth_token)
+          : signInAnonymously(auth);
+
+        initAuth.then(async (userCredential) => {
+          const user = userCredential.user;
+          if (!user) return;
+
+          // Strict path for public collaborative state
+          const stateDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'gameState', 'current');
+          window.CloudSync.docRef = stateDocRef;
+          window.CloudSync.isReady = true;
+
+          // Update Sync UI indicator
+          const statusEl = document.getElementById('cloudSyncIndicator');
+          if (statusEl) {
+            statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span><span class="text-emerald-300 font-bold">雲端同步中</span>';
+          }
+
+          // Real-time synchronization listener
+          onSnapshot(stateDocRef, (snapshot) => {
+            if (snapshot.exists()) {
+              const remoteData = snapshot.data();
+              if (remoteData && window.applyRemoteData) {
+                window.applyRemoteData(remoteData);
+              }
+            } else {
+              // If initial remote doc doesn't exist, push local default state
+              if (window.getGameStatePayload) {
+                setDoc(stateDocRef, window.getGameStatePayload()).catch(err => console.error("Initial sync err", err));
+              }
+            }
+          }, (err) => {
+            console.error("Cloud sync snapshot error:", err);
+          });
+
+          // Define save helper
+          window.CloudSync.saveState = async function(data) {
+            if (!window.CloudSync.docRef) return;
+            try {
+              await setDoc(window.CloudSync.docRef, data);
+            } catch (err) {
+              console.error("Cloud push failed:", err);
+            }
+          };
+        }).catch(err => {
+          console.error("Auth failed:", err);
+          updateSyncFailedUI();
+        });
+      } else {
+        updateSyncFailedUI();
+      }
+    } catch (e) {
+      console.warn("Cloud setup fallback to local mode:", e);
+      updateSyncFailedUI();
+    }
+
+    function updateSyncFailedUI() {
+      const statusEl = document.getElementById('cloudSyncIndicator');
+      if (statusEl) {
+        statusEl.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-400"></span><span class="text-amber-300">單機協作模式</span>';
+      }
+    }
+  </script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            ocean: {
+              900: '#07162c',
+              800: '#0c2340',
+              700: '#133966',
+              600: '#1b4d89',
+              500: '#2563eb'
+            },
+            pirate: {
+              gold: '#f59e0b',
+              goldLight: '#fde68a',
+              crimson: '#dc2626',
+              brass: '#d97706',
+              wood: '#78350f',
+              parchment: '#fef3c7'
+            }
+          },
+          animation: {
+            'float': 'floating 3s ease-in-out infinite',
+            'pulse-gold': 'pulseGold 2s infinite',
+            'shimmer': 'shimmer 2s linear infinite',
+          },
+          keyframes: {
+            floating: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-6px)' }
+            },
+            pulseGold: {
+              '0%, 100%': { opacity: '1', boxShadow: '0 0 15px rgba(245, 158, 11, 0.6)' },
+              '50%': { opacity: '0.8', boxShadow: '0 0 5px rgba(245, 158, 11, 0.2)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+    
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background: radial-gradient(circle at 50% 10%, #112d4e 0%, #061426 100%);
+      color: #f1f5f9;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .font-cinzel {
+      font-family: 'Cinzel', serif;
+    }
+
+    /* Custom parchment texture pattern */
+    .parchment-card {
+      background: linear-gradient(135deg, rgba(254, 243, 199, 0.08) 0%, rgba(217, 119, 6, 0.05) 100%), #0d2137;
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      backdrop-filter: blur(8px);
+    }
+
+    .pirate-border {
+      border: 2px solid #b45309;
+      box-shadow: inset 0 0 10px rgba(180, 83, 9, 0.3), 0 4px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #091726;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #b45309;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #f59e0b;
+    }
+
+    /* Card Flip 3D */
+    .perspective-1000 {
+      perspective: 1000px;
+    }
+    .transform-style-3d {
+      transform-style: preserve-3d;
+    }
+    .backface-hidden {
+      backface-visibility: hidden;
+    }
+    .rotate-y-180 {
+      transform: rotateY(180deg);
+    }
+  </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.pointer-events-none{pointer-events:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:0px}.right-4{right:1rem}.top-0{top:0px}.top-4{top:1rem}.bottom-5{bottom:1.25rem}.right-5{right:1.25rem}.-top-2{top:-0.5rem}.bottom-0{bottom:0px}.left-1\/2{left:50%}.left-1\/4{left:25%}.left-3\/4{left:75%}.z-10{z-index:10}.z-40{z-index:40}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.my-4{margin-top:1rem;margin-bottom:1rem}.my-6{margin-top:1.5rem;margin-bottom:1.5rem}.my-auto{margin-top:auto;margin-bottom:auto}.mb-1{margin-bottom:0.25rem}.mb-2{margin-bottom:0.5rem}.mb-4{margin-bottom:1rem}.mb-5{margin-bottom:1.25rem}.mb-6{margin-bottom:1.5rem}.mr-1{margin-right:0.25rem}.mt-0\.5{margin-top:0.125rem}.mt-1{margin-top:0.25rem}.mt-4{margin-top:1rem}.mb-1\.5{margin-bottom:0.375rem}.ml-auto{margin-left:auto}.block{display:block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.h-10{height:2.5rem}.h-16{height:4rem}.h-2{height:0.5rem}.h-2\.5{height:0.625rem}.h-20{height:5rem}.h-8{height:2rem}.h-9{height:2.25rem}.h-96{height:24rem}.h-5{height:1.25rem}.h-full{height:100%}.max-h-\[500px\]{max-height:500px}.max-h-\[90vh\]{max-height:90vh}.max-h-\[92vh\]{max-height:92vh}.w-10{width:2.5rem}.w-16{width:4rem}.w-2{width:0.5rem}.w-2\.5{width:0.625rem}.w-20{width:5rem}.w-64{width:16rem}.w-9{width:2.25rem}.w-full{width:100%}.w-px{width:1px}.w-8{width:2rem}.min-w-\[70px\]{min-width:70px}.max-w-2xl{max-width:42rem}.max-w-3xl{max-width:48rem}.max-w-7xl{max-width:80rem}.max-w-sm{max-width:24rem}.max-w-xl{max-width:36rem}.max-w-xs{max-width:20rem}.flex-1{flex:1 1 0%}.-translate-x-1\/2{--tw-translate-x:-50%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.transform{transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes pulseGold{0%, 100%{opacity:1;box-shadow:0 0 15px rgba(245, 158, 11, 0.6)}50%{opacity:0.8;box-shadow:0 0 5px rgba(245, 158, 11, 0.2)}}.animate-pulse-gold{animation:pulseGold 2s infinite}@keyframes spin{to{transform:rotate(360deg)}}.animate-spin{animation:spin 1s linear infinite}@keyframes floating{0%, 100%{transform:translateY(0px)}50%{transform:translateY(-6px)}}.animate-float{animation:floating 3s ease-in-out infinite}@keyframes ping{75%, 100%{transform:scale(2);opacity:0}}.animate-ping{animation:ping 1s cubic-bezier(0, 0, 0.2, 1) infinite}.cursor-pointer{cursor:pointer}.list-inside{list-style-position:inside}.list-disc{list-style-type:disc}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.gap-6{gap:1.5rem}.gap-2\.5{gap:0.625rem}.space-x-3 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(0.75rem * var(--tw-space-x-reverse));margin-left:calc(0.75rem * calc(1 - var(--tw-space-x-reverse)))}.space-y-1 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem * var(--tw-space-y-reverse))}.space-y-8 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(2rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(2rem * var(--tw-space-y-reverse))}.divide-y > :not([hidden]) ~ :not([hidden]){--tw-divide-y-reverse:0;border-top-width:calc(1px * calc(1 - var(--tw-divide-y-reverse)));border-bottom-width:calc(1px * var(--tw-divide-y-reverse))}.divide-slate-800 > :not([hidden]) ~ :not([hidden]){--tw-divide-opacity:1;border-color:rgb(30 41 59 / var(--tw-divide-opacity, 1))}.overflow-hidden{overflow:hidden}.overflow-visible{overflow:visible}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.rounded-t-2xl{border-top-left-radius:1rem;border-top-right-radius:1rem}.border{border-width:1px}.border-2{border-width:2px}.border-4{border-width:4px}.border-b{border-bottom-width:1px}.border-l-4{border-left-width:4px}.border-t{border-top-width:1px}.border-amber-300{--tw-border-opacity:1;border-color:rgb(252 211 77 / var(--tw-border-opacity, 1))}.border-amber-400{--tw-border-opacity:1;border-color:rgb(251 191 36 / var(--tw-border-opacity, 1))}.border-amber-400\/40{border-color:rgb(251 191 36 / 0.4)}.border-amber-400\/60{border-color:rgb(251 191 36 / 0.6)}.border-amber-500{--tw-border-opacity:1;border-color:rgb(245 158 11 / var(--tw-border-opacity, 1))}.border-amber-500\/20{border-color:rgb(245 158 11 / 0.2)}.border-amber-500\/30{border-color:rgb(245 158 11 / 0.3)}.border-amber-500\/40{border-color:rgb(245 158 11 / 0.4)}.border-amber-600\/30{border-color:rgb(217 119 6 / 0.3)}.border-amber-600\/40{border-color:rgb(217 119 6 / 0.4)}.border-amber-600\/50{border-color:rgb(217 119 6 / 0.5)}.border-rose-800\/50{border-color:rgb(159 18 57 / 0.5)}.border-slate-700{--tw-border-opacity:1;border-color:rgb(51 65 85 / var(--tw-border-opacity, 1))}.border-slate-700\/50{border-color:rgb(51 65 85 / 0.5)}.border-slate-700\/60{border-color:rgb(51 65 85 / 0.6)}.border-slate-800{--tw-border-opacity:1;border-color:rgb(30 41 59 / var(--tw-border-opacity, 1))}.border-emerald-500\/30{border-color:rgb(16 185 129 / 0.3)}.border-emerald-500\/40{border-color:rgb(16 185 129 / 0.4)}.border-emerald-500\/80{border-color:rgb(16 185 129 / 0.8)}.border-emerald-600\/30{border-color:rgb(5 150 105 / 0.3)}.border-rose-600\/30{border-color:rgb(225 29 72 / 0.3)}.border-slate-600{--tw-border-opacity:1;border-color:rgb(71 85 105 / var(--tw-border-opacity, 1))}.border-amber-500\/70{border-color:rgb(245 158 11 / 0.7)}.border-amber-600{--tw-border-opacity:1;border-color:rgb(217 119 6 / var(--tw-border-opacity, 1))}.border-blue-600{--tw-border-opacity:1;border-color:rgb(37 99 235 / var(--tw-border-opacity, 1))}.border-emerald-600{--tw-border-opacity:1;border-color:rgb(5 150 105 / var(--tw-border-opacity, 1))}.border-white\/20{border-color:rgb(255 255 255 / 0.2)}.border-l-amber-500{--tw-border-opacity:1;border-left-color:rgb(245 158 11 / var(--tw-border-opacity, 1))}.bg-amber-400{--tw-bg-opacity:1;background-color:rgb(251 191 36 / var(--tw-bg-opacity, 1))}.bg-amber-500{--tw-bg-opacity:1;background-color:rgb(245 158 11 / var(--tw-bg-opacity, 1))}.bg-amber-500\/10{background-color:rgb(245 158 11 / 0.1)}.bg-amber-500\/20{background-color:rgb(245 158 11 / 0.2)}.bg-amber-950\/30{background-color:rgb(69 26 3 / 0.3)}.bg-black\/80{background-color:rgb(0 0 0 / 0.8)}.bg-black\/85{background-color:rgb(0 0 0 / 0.85)}.bg-blue-500{--tw-bg-opacity:1;background-color:rgb(59 130 246 / var(--tw-bg-opacity, 1))}.bg-ocean-900{--tw-bg-opacity:1;background-color:rgb(7 22 44 / var(--tw-bg-opacity, 1))}.bg-ocean-900\/80{background-color:rgb(7 22 44 / 0.8)}.bg-ocean-900\/90{background-color:rgb(7 22 44 / 0.9)}.bg-purple-500{--tw-bg-opacity:1;background-color:rgb(168 85 247 / var(--tw-bg-opacity, 1))}.bg-rose-950{--tw-bg-opacity:1;background-color:rgb(76 5 25 / var(--tw-bg-opacity, 1))}.bg-slate-400{--tw-bg-opacity:1;background-color:rgb(148 163 184 / var(--tw-bg-opacity, 1))}.bg-slate-500{--tw-bg-opacity:1;background-color:rgb(100 116 139 / var(--tw-bg-opacity, 1))}.bg-slate-700{--tw-bg-opacity:1;background-color:rgb(51 65 85 / var(--tw-bg-opacity, 1))}.bg-slate-800{--tw-bg-opacity:1;background-color:rgb(30 41 59 / var(--tw-bg-opacity, 1))}.bg-slate-800\/90{background-color:rgb(30 41 59 / 0.9)}.bg-slate-900{--tw-bg-opacity:1;background-color:rgb(15 23 42 / var(--tw-bg-opacity, 1))}.bg-slate-950{--tw-bg-opacity:1;background-color:rgb(2 6 23 / var(--tw-bg-opacity, 1))}.bg-amber-950\/20{background-color:rgb(69 26 3 / 0.2)}.bg-emerald-500\/20{background-color:rgb(16 185 129 / 0.2)}.bg-rose-950\/20{background-color:rgb(76 5 25 / 0.2)}.bg-slate-950\/60{background-color:rgb(2 6 23 / 0.6)}.bg-amber-500\/30{background-color:rgb(245 158 11 / 0.3)}.bg-amber-900\/80{background-color:rgb(120 53 15 / 0.8)}.bg-blue-500\/30{background-color:rgb(59 130 246 / 0.3)}.bg-blue-900\/80{background-color:rgb(30 58 138 / 0.8)}.bg-emerald-950{--tw-bg-opacity:1;background-color:rgb(2 44 34 / var(--tw-bg-opacity, 1))}.bg-purple-500\/30{background-color:rgb(168 85 247 / 0.3)}.bg-slate-900\/80{background-color:rgb(15 23 42 / 0.8)}.bg-slate-900\/90{background-color:rgb(15 23 42 / 0.9)}.bg-emerald-400{--tw-bg-opacity:1;background-color:rgb(52 211 153 / var(--tw-bg-opacity, 1))}.bg-gradient-to-b{background-image:linear-gradient(to bottom, var(--tw-gradient-stops))}.bg-gradient-to-br{background-image:linear-gradient(to bottom right, var(--tw-gradient-stops))}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.from-amber-400{--tw-gradient-from:#fbbf24 var(--tw-gradient-from-position);--tw-gradient-to:rgb(251 191 36 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-amber-500{--tw-gradient-from:#f59e0b var(--tw-gradient-from-position);--tw-gradient-to:rgb(245 158 11 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-amber-700{--tw-gradient-from:#b45309 var(--tw-gradient-from-position);--tw-gradient-to:rgb(180 83 9 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-emerald-600{--tw-gradient-from:#059669 var(--tw-gradient-from-position);--tw-gradient-to:rgb(5 150 105 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-rose-600{--tw-gradient-from:#e11d48 var(--tw-gradient-from-position);--tw-gradient-to:rgb(225 29 72 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-emerald-500{--tw-gradient-from:#10b981 var(--tw-gradient-from-position);--tw-gradient-to:rgb(16 185 129 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.via-amber-500{--tw-gradient-to:rgb(245 158 11 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), #f59e0b var(--tw-gradient-via-position), var(--tw-gradient-to)}.via-amber-900{--tw-gradient-to:rgb(120 53 15 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), #78350f var(--tw-gradient-via-position), var(--tw-gradient-to)}.via-slate-900{--tw-gradient-to:rgb(15 23 42 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), #0f172a var(--tw-gradient-via-position), var(--tw-gradient-to)}.to-amber-600{--tw-gradient-to:#d97706 var(--tw-gradient-to-position)}.to-amber-700{--tw-gradient-to:#b45309 var(--tw-gradient-to-position)}.to-ocean-900{--tw-gradient-to:#07162c var(--tw-gradient-to-position)}.to-red-700{--tw-gradient-to:#b91c1c var(--tw-gradient-to-position)}.to-teal-700{--tw-gradient-to:#0f766e var(--tw-gradient-to-position)}.to-teal-600{--tw-gradient-to:#0d9488 var(--tw-gradient-to-position)}.p-2{padding:0.5rem}.p-3{padding:0.75rem}.p-3\.5{padding:0.875rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-2\.5{padding:0.625rem}.p-1{padding:0.25rem}.px-1\.5{padding-left:0.375rem;padding-right:0.375rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.px-8{padding-left:2rem;padding-right:2rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-3\.5{padding-top:0.875rem;padding-bottom:0.875rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.px-1{padding-left:0.25rem;padding-right:0.25rem}.pb-2{padding-bottom:0.5rem}.pr-1{padding-right:0.25rem}.pt-2{padding-top:0.5rem}.pt-3{padding-top:0.75rem}.pt-4{padding-top:1rem}.text-left{text-align:left}.text-center{text-align:center}.text-right{text-align:right}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.font-sans{font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-black{font-weight:900}.font-bold{font-weight:700}.font-normal{font-weight:400}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-relaxed{line-height:1.625}.leading-snug{line-height:1.375}.tracking-wide{letter-spacing:0.025em}.tracking-wider{letter-spacing:0.05em}.tracking-widest{letter-spacing:0.1em}.text-amber-200{--tw-text-opacity:1;color:rgb(253 230 138 / var(--tw-text-opacity, 1))}.text-amber-200\/60{color:rgb(253 230 138 / 0.6)}.text-amber-200\/70{color:rgb(253 230 138 / 0.7)}.text-amber-200\/80{color:rgb(253 230 138 / 0.8)}.text-amber-300{--tw-text-opacity:1;color:rgb(252 211 77 / var(--tw-text-opacity, 1))}.text-amber-400{--tw-text-opacity:1;color:rgb(251 191 36 / var(--tw-text-opacity, 1))}.text-amber-400\/80{color:rgb(251 191 36 / 0.8)}.text-emerald-400{--tw-text-opacity:1;color:rgb(52 211 153 / var(--tw-text-opacity, 1))}.text-ocean-900{--tw-text-opacity:1;color:rgb(7 22 44 / var(--tw-text-opacity, 1))}.text-rose-300{--tw-text-opacity:1;color:rgb(253 164 175 / var(--tw-text-opacity, 1))}.text-rose-400{--tw-text-opacity:1;color:rgb(251 113 133 / var(--tw-text-opacity, 1))}.text-rose-500{--tw-text-opacity:1;color:rgb(244 63 94 / var(--tw-text-opacity, 1))}.text-slate-200{--tw-text-opacity:1;color:rgb(226 232 240 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-900{--tw-text-opacity:1;color:rgb(15 23 42 / var(--tw-text-opacity, 1))}.text-slate-950{--tw-text-opacity:1;color:rgb(2 6 23 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-emerald-300{--tw-text-opacity:1;color:rgb(110 231 183 / var(--tw-text-opacity, 1))}.text-amber-600{--tw-text-opacity:1;color:rgb(217 119 6 / var(--tw-text-opacity, 1))}.text-blue-200{--tw-text-opacity:1;color:rgb(191 219 254 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-slate-600{--tw-text-opacity:1;color:rgb(71 85 105 / var(--tw-text-opacity, 1))}.underline{-webkit-text-decoration-line:underline;text-decoration-line:underline}.underline-offset-4{text-underline-offset:4px}.opacity-60{opacity:0.6}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-amber-500\/20{--tw-shadow-color:rgb(245 158 11 / 0.2);--tw-shadow:var(--tw-shadow-colored)}.shadow-amber-500\/30{--tw-shadow-color:rgb(245 158 11 / 0.3);--tw-shadow:var(--tw-shadow-colored)}.shadow-amber-600\/30{--tw-shadow-color:rgb(217 119 6 / 0.3);--tw-shadow:var(--tw-shadow-colored)}.shadow-amber-900\/40{--tw-shadow-color:rgb(120 53 15 / 0.4);--tw-shadow:var(--tw-shadow-colored)}.shadow-emerald-700\/30{--tw-shadow-color:rgb(4 120 87 / 0.3);--tw-shadow:var(--tw-shadow-colored)}.shadow-red-700\/30{--tw-shadow-color:rgb(185 28 28 / 0.3);--tw-shadow:var(--tw-shadow-colored)}.shadow-emerald-500\/20{--tw-shadow-color:rgb(16 185 129 / 0.2);--tw-shadow:var(--tw-shadow-colored)}.shadow-amber-500\/10{--tw-shadow-color:rgb(245 158 11 / 0.1);--tw-shadow:var(--tw-shadow-colored)}.backdrop-blur-md{--tw-backdrop-blur:blur(12px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-transform{transition-property:transform;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-700{transition-duration:700ms}.duration-1000{transition-duration:1000ms}.selection\:bg-amber-500 *::selection{--tw-bg-opacity:1;background-color:rgb(245 158 11 / var(--tw-bg-opacity, 1))}.selection\:text-black *::selection{--tw-text-opacity:1;color:rgb(0 0 0 / var(--tw-text-opacity, 1))}.selection\:bg-amber-500::selection{--tw-bg-opacity:1;background-color:rgb(245 158 11 / var(--tw-bg-opacity, 1))}.selection\:text-black::selection{--tw-text-opacity:1;color:rgb(0 0 0 / var(--tw-text-opacity, 1))}.hover\:bg-amber-400:hover{--tw-bg-opacity:1;background-color:rgb(251 191 36 / var(--tw-bg-opacity, 1))}.hover\:bg-amber-500\/30:hover{background-color:rgb(245 158 11 / 0.3)}.hover\:bg-slate-700:hover{--tw-bg-opacity:1;background-color:rgb(51 65 85 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-800\/40:hover{background-color:rgb(30 41 59 / 0.4)}.hover\:from-amber-300:hover{--tw-gradient-from:#fcd34d var(--tw-gradient-from-position);--tw-gradient-to:rgb(252 211 77 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.hover\:from-amber-400:hover{--tw-gradient-from:#fbbf24 var(--tw-gradient-from-position);--tw-gradient-to:rgb(251 191 36 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.hover\:from-emerald-500:hover{--tw-gradient-from:#10b981 var(--tw-gradient-from-position);--tw-gradient-to:rgb(16 185 129 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.hover\:from-rose-500:hover{--tw-gradient-from:#f43f5e var(--tw-gradient-from-position);--tw-gradient-to:rgb(244 63 94 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.hover\:from-emerald-400:hover{--tw-gradient-from:#34d399 var(--tw-gradient-from-position);--tw-gradient-to:rgb(52 211 153 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.hover\:to-amber-500:hover{--tw-gradient-to:#f59e0b var(--tw-gradient-to-position)}.hover\:to-red-600:hover{--tw-gradient-to:#dc2626 var(--tw-gradient-to-position)}.hover\:to-teal-600:hover{--tw-gradient-to:#0d9488 var(--tw-gradient-to-position)}.hover\:text-amber-300:hover{--tw-text-opacity:1;color:rgb(252 211 77 / var(--tw-text-opacity, 1))}.hover\:text-rose-300:hover{--tw-text-opacity:1;color:rgb(253 164 175 / var(--tw-text-opacity, 1))}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.hover\:text-rose-400:hover{--tw-text-opacity:1;color:rgb(251 113 133 / var(--tw-text-opacity, 1))}.focus\:border-amber-400:focus{--tw-border-opacity:1;border-color:rgb(251 191 36 / var(--tw-border-opacity, 1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.active\:scale-95:active{--tw-scale-x:.95;--tw-scale-y:.95;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@media (min-width: 640px){.sm\:block{display:block}.sm\:flex{display:flex}.sm\:inline-flex{display:inline-flex}.sm\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.sm\:items-center{align-items:center}.sm\:p-5{padding:1.25rem}.sm\:p-6{padding:1.5rem}.sm\:p-7{padding:1.75rem}.sm\:px-4{padding-left:1rem;padding-right:1rem}.sm\:px-6{padding-left:1.5rem;padding-right:1.5rem}.sm\:text-base{font-size:1rem;line-height:1.5rem}.sm\:text-lg{font-size:1.125rem;line-height:1.75rem}.sm\:text-sm{font-size:0.875rem;line-height:1.25rem}.sm\:text-xl{font-size:1.25rem;line-height:1.75rem}}@media (min-width: 768px){.md\:w-auto{width:auto}.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.md\:flex-row{flex-direction:row}}@media (min-width: 1024px){.lg\:col-span-2{grid-column:span 2 / span 2}.lg\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}}</style></head>
+<body class="selection:bg-amber-500 selection:text-black">
+
+  <!-- TOP NAVIGATION HEADER -->
+  <header class="sticky top-0 z-40 bg-ocean-900/90 backdrop-blur-md border-b border-amber-600/30 shadow-xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
+      <!-- Title & Branding -->
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-700 flex items-center justify-center shadow-lg shadow-amber-900/40 border border-amber-300">
+          <i class="fa-solid fa-anchor text-ocean-900 text-xl"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-cinzel text-lg sm:text-xl font-bold tracking-wider text-amber-300">
+              雙人奪寶戰 <span class="text-white text-sm sm:text-base font-sans font-bold">航海大冒險</span>
+            </h1>
+            <span class="bg-amber-500/20 text-amber-300 text-xs px-2 py-0.5 rounded-full border border-amber-500/40">14人 7大戰隊</span>
+            <span id="cloudSyncIndicator" class="hidden sm:inline-flex items-center gap-1.5 text-[11px] bg-slate-800/90 border border-slate-700 px-2.5 py-0.5 rounded-full"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span><span class="text-emerald-300 font-bold">雲端同步中</span></span>
+          </div>
+          <p class="text-xs text-amber-200/60 hidden sm:block">同心協力加成 × 航海事件卡牌博弈 × 跨裝置雲端同步</p>
+        </div>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="flex items-center gap-2">
+        <button onclick="openScoreModal()" class="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold px-3 sm:px-4 py-2 rounded-xl shadow-lg shadow-amber-600/30 transition-all transform active:scale-95 text-xs sm:text-sm">
+          <i class="fa-solid fa-feather-pointed"></i>
+          <span>每日得分輸入</span>
+        </button>
+        <button onclick="openGachaModal()" class="flex items-center gap-2 bg-gradient-to-r from-rose-600 to-red-700 hover:from-rose-500 hover:to-red-600 text-white font-bold px-3 sm:px-4 py-2 rounded-xl shadow-lg shadow-red-700/30 transition-all transform active:scale-95 text-xs sm:text-sm">
+          <i class="fa-solid fa-dice-d20"></i>
+          <span class="hidden xs:inline">事件</span><span>抽卡中心</span>
+          <span id="gachaEligibleBadge" class="bg-amber-400 text-slate-900 text-xs px-1.5 py-0.2 rounded-full font-black">!</span>
+        </button>
+        <button onclick="openDeployModal()" class="flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-bold px-3 py-2 rounded-xl shadow-lg shadow-emerald-700/30 transition-all transform active:scale-95 text-xs sm:text-sm" title="一鍵部署到協作平台或發布網址">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <span>部署上線</span>
+        </button>
+        <button onclick="openConfigModal()" class="p-2 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 rounded-xl transition" title="組別與競賽設定">
+          <i class="fa-solid fa-sliders text-base"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-8">
+
+    <!-- HERO NOTIFICATION / REVISE BANNER -->
+    <section class="parchment-card rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4 border-l-4 border-l-amber-500 shadow-2xl relative overflow-hidden">
+      <div class="flex items-start sm:items-center space-x-3 z-10">
+        <div class="text-3xl text-amber-400 p-2 bg-amber-500/10 rounded-lg">
+          <i class="fa-solid fa-compass animate-spin text-2xl" style="animation-duration: 18s;"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-amber-300 text-sm tracking-wide uppercase">航海通告</span>
+            <span class="text-xs text-slate-400" id="currentDateDisplay">2026年11月5日星期四</span>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-200 mt-0.5">
+            兩名隊員同日各產出至少 1 項指標即觸發 <strong class="text-amber-300 font-bold">「同心協力」點數 ×1.2 倍</strong>！單隊當日結算達 <strong class="text-rose-400 font-bold">5 點</strong> 即獲抽卡資格！
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 z-10 w-full md:w-auto justify-end">
+        <div class="text-right">
+          <div class="text-xs text-slate-400">目前航海霸主</div>
+          <div class="text-sm font-bold text-amber-300" id="leaderTeamText">👑 黃金梅利號 (Going Merry) (19.2 點)</div>
+        </div>
+        <div class="h-8 w-px bg-slate-700"></div>
+        <button onclick="showRulesModal()" class="text-xs text-amber-400 hover:text-amber-300 underline underline-offset-4 flex items-center gap-1">
+          <i class="fa-solid fa-circle-question"></i> 查看記分與卡牌規則
+        </button>
+      </div>
+    </section>
+
+    <!-- SECTION 1: INTERACTIVE NAUTICAL MAP -->
+    <section class="parchment-card rounded-3xl p-5 sm:p-6 shadow-2xl relative">
+      <div class="flex flex-wrap items-center justify-between mb-4 gap-2">
+        <div>
+          <h2 class="text-lg sm:text-xl font-black text-amber-300 flex items-center gap-2">
+            <i class="fa-solid fa-map-location-dot text-amber-400"></i>
+            七大海盜船進度航道 (Nautical Track)
+          </h2>
+          <p class="text-xs text-slate-400">航程終點為「傳奇黃金島（100點）」，即時隨各隊積分向前巡弋</p>
+        </div>
+        <div class="flex items-center gap-2 text-xs">
+          <span class="flex items-center gap-1 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span> 啟航港 (0)</span>
+          <span class="flex items-center gap-1 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> 珊瑚礁 (25)</span>
+          <span class="flex items-center gap-1 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> 暴風眼 (50)</span>
+          <span class="flex items-center gap-1 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> 黃金島 (100)</span>
+        </div>
+      </div>
+
+      <!-- Map Track Visualization -->
+      <div id="nauticalMapTracks" class="space-y-4 pt-2">
+          <div class="relative bg-slate-900/80 rounded-2xl p-3 border border-slate-800">
+            <div class="flex items-center justify-between text-xs mb-1.5">
+              <div class="flex items-center gap-2">
+                <span class="font-cinzel font-black px-2 py-0.5 rounded text-[10px]" style="background-color: #ef444433; color: #ef4444">
+                  #1
+                </span>
+                <span class="font-bold text-slate-200">黃金梅利號 (Going Merry)</span>
+                <span class="text-[11px] text-slate-400">(魯夫 &amp; 索隆)</span>
+              </div>
+              <div class="font-mono font-bold text-amber-300">
+                19.2 <span class="text-[10px] text-slate-400">/ 100 點</span>
+              </div>
+            </div>
+
+            <!-- Ocean Track Bar -->
+            <div class="w-full h-5 bg-ocean-950 rounded-full relative overflow-visible border border-slate-700/60 flex items-center">
+              
+              <!-- Checkpoint markers -->
+              <div class="absolute left-1/4 top-0 bottom-0 w-px bg-blue-500/30"></div>
+              <div class="absolute left-1/2 top-0 bottom-0 w-px bg-purple-500/30"></div>
+              <div class="absolute left-3/4 top-0 bottom-0 w-px bg-amber-500/30"></div>
+
+              <!-- Filled wake trail -->
+              <div class="h-full rounded-full transition-all duration-1000 opacity-60" style="width: 19.2%; background: linear-gradient(90deg, transparent, #ef4444);">
+              </div>
+
+              <!-- Ship Icon Pin -->
+              <div class="absolute transform -translate-x-1/2 -top-2 transition-all duration-1000 z-10" style="left: 19.2%;">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-lg border-2 border-amber-300 animate-float" style="background: #ef4444; color: #07162c;">
+                  <i class="fa-solid fa-hat-cowboy"></i>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        
+          <div class="relative bg-slate-900/80 rounded-2xl p-3 border border-slate-800">
+            <div class="flex items-center justify-between text-xs mb-1.5">
+              <div class="flex items-center gap-2">
+                <span class="font-cinzel font-black px-2 py-0.5 rounded text-[10px]" style="background-color: #eab30833; color: #eab308">
+                  #2
+                </span>
+                <span class="font-bold text-slate-200">皇家冒險號 (Royal Fortune)</span>
+                <span class="text-[11px] text-slate-400">(大谷翔平 &amp; 山本由伸)</span>
+              </div>
+              <div class="font-mono font-bold text-amber-300">
+                10.8 <span class="text-[10px] text-slate-400">/ 100 點</span>
+              </div>
+            </div>
+
+            <!-- Ocean Track Bar -->
+            <div class="w-full h-5 bg-ocean-950 rounded-full relative overflow-visible border border-slate-700/60 flex items-center">
+              
+              <!-- Checkpoint markers -->
+              <div class="absolute left-1/4 top-0 bottom-0 w-px bg-blue-500/30"></div>
+              <div class="absolute left-1/2 top-0 bottom-0 w-px bg-purple-500/30"></div>
+              <div class="absolute left-3/4 top-0 bottom-0 w-px bg-amber-500/30"></div>
+
+              <!-- Filled wake trail -->
+              <div class="h-full rounded-full transition-all duration-1000 opacity-60" style="width: 10.8%; background: linear-gradient(90deg, transparent, #eab308);">
+              </div>
+
+              <!-- Ship Icon Pin -->
+              <div class="absolute transform -translate-x-1/2 -top-2 transition-all duration-1000 z-10" style="left: 10.8%;">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-lg border-2 border-amber-300 animate-float" style="background: #eab308; color: #07162c;">
+                  <i class="fa-solid fa-compass"></i>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        
+          <div class="relative bg-slate-900/80 rounded-2xl p-3 border border-slate-800">
+            <div class="flex items-center justify-between text-xs mb-1.5">
+              <div class="flex items-center gap-2">
+                <span class="font-cinzel font-black px-2 py-0.5 rounded text-[10px]" style="background-color: #f59e0b33; color: #f59e0b">
+                  #3
+                </span>
+                <span class="font-bold text-slate-200">黑珍珠號 (Black Pearl)</span>
+                <span class="text-[11px] text-slate-400">(林書豪 &amp; 柯瑞)</span>
+              </div>
+              <div class="font-mono font-bold text-amber-300">
+                9.0 <span class="text-[10px] text-slate-400">/ 100 點</span>
+              </div>
+            </div>
+
+            <!-- Ocean Track Bar -->
+            <div class="w-full h-5 bg-ocean-950 rounded-full relative overflow-visible border border-slate-700/60 flex items-center">
+              
+              <!-- Checkpoint markers -->
+              <div class="absolute left-1/4 top-0 bottom-0 w-px bg-blue-500/30"></div>
+              <div class="absolute left-1/2 top-0 bottom-0 w-px bg-purple-500/30"></div>
+              <div class="absolute left-3/4 top-0 bottom-0 w-px bg-amber-500/30"></div>
+
+              <!-- Filled wake trail -->
+              <div class="h-full rounded-full transition-all duration-1000 opacity-60" style="width: 9%; background: linear-gradient(90deg, transparent, #f59e0b);">
+              </div>
+
+              <!-- Ship Icon Pin -->
+              <div class="absolute transform -translate-x-1/2 -top-2 transition-all duration-1000 z-10" style="left: 9%;">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-lg border-2 border-amber-300 animate-float" style="background: #f59e0b; color: #07162c;">
+                  <i class="fa-solid fa-skull-crossbones"></i>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        
+          <div class="relative bg-slate-900/80 rounded-2xl p-3 border border-slate-800">
+            <div class="flex items-center justify-between text-xs mb-1.5">
+              <div class="flex items-center gap-2">
+                <span class="font-cinzel font-black px-2 py-0.5 rounded text-[10px]" style="background-color: #10b98133; color: #10b981">
+                  #4
+                </span>
+                <span class="font-bold text-slate-200">飛翔荷蘭人 (Flying Dutchman)</span>
+                <span class="text-[11px] text-slate-400">(陳金鋒 &amp; 彭政閔)</span>
+              </div>
+              <div class="font-mono font-bold text-amber-300">
+                0.0 <span class="text-[10px] text-slate-400">/ 100 點</span>
+              </div>
+            </div>
+
+            <!-- Ocean Track Bar -->
+            <div class="w-full h-5 bg-ocean-950 rounded-full relative overflow-visible border border-slate-700/60 flex items-center">
+              
+              <!-- Checkpoint markers -->
+              <div class="absolute left-1/4 top-0 bottom-0 w-px bg-blue-500/30"></div>
+              <div class="absolute left-1/2 top-0 bottom-0 w-px bg-purple-500/30"></div>
+              <div class="absolute left-3/4 top-0 bottom-0 w-px bg-amber-500/30"></div>
+
+              <!-- Filled wake trail -->
+              <div class="h-full rounded-full transition-all duration-1000 opacity-60" style="width: 3%; background: linear-gradient(90deg, transparent, #10b981);">
+              </div>
+
+              <!-- Ship Icon Pin -->
+              <div class="absolute transform -translate-x-1/2 -top-2 transition-all duration-1000 z-10" style="left: 3%;">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-lg border-2 border-amber-300 animate-float" style="background: #10b981; color: #07162c;">
+                  <i class="fa-solid fa-ghost"></i>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        
+          <div class="relative bg-slate-900/80 rounded-2xl p-3 border border-slate-800">
+            <div class="flex items-center justify-between text-xs mb-1.5">
+              <div class="flex items-center gap-2">
+                <span class="font-cinzel font-black px-2 py-0.5 rounded text-[10px]" style="background-color: #8b5cf633; color: #8b5cf6">
+                  #5
+                </span>
+                <span class="font-bold text-slate-200">安妮女王復仇號 (Queen Anne)</span>
+                <span class="text-[11px] text-slate-400">(張雨生 &amp; 周杰倫)</span>
+              </div>
+              <div class="font-mono font-bold text-amber-300">
+                0.0 <span class="text-[10px] text-slate-400">/ 100 點</span>
+              </div>
+            </div>
+
+            <!-- Ocean Track Bar -->
+            <div class="w-full h-5 bg-ocean-950 rounded-full relative overflow-visible border border-slate-700/60 flex items-center">
+              
+              <!-- Checkpoint markers -->
+              <div class="absolute left-1/4 top-0 bottom-0 w-px bg-blue-500/30"></div>
+              <div class="absolute left-1/2 top-0 bottom-0 w-px bg-purple-500/30"></div>
+              <div class="absolute left-3/4 top-0 bottom-0 w-px bg-amber-500/30"></div>
+
+              <!-- Filled wake trail -->
+              <div class="h-full rounded-full transition-all duration-1000 opacity-60" style="width: 3%; background: linear-gradient(90deg, transparent, #8b5cf6);">
+              </div>
+
+              <!-- Ship Icon Pin -->
+              <div class="absolute transform -translate-x-1/2 -top-2 transition-all duration-1000 z-10" style="left: 3%;">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-lg border-2 border-amber-300 animate-float" style="background: #8b5cf6; color: #07162c;">
+                  <i class="fa-solid fa-crown"></i>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        
+          <div class="relative bg-slate-900/80 rounded-2xl p-3 border border-slate-800">
+            <div class="flex items-center justify-between text-xs mb-1.5">
+              <div class="flex items-center gap-2">
+                <span class="font-cinzel font-black px-2 py-0.5 rounded text-[10px]" style="background-color: #06b6d433; color: #06b6d4">
+                  #6
+                </span>
+                <span class="font-bold text-slate-200">千陽號 (Thousand Sunny)</span>
+                <span class="text-[11px] text-slate-400">(香吉士 &amp; 娜美)</span>
+              </div>
+              <div class="font-mono font-bold text-amber-300">
+                0.0 <span class="text-[10px] text-slate-400">/ 100 點</span>
+              </div>
+            </div>
+
+            <!-- Ocean Track Bar -->
+            <div class="w-full h-5 bg-ocean-950 rounded-full relative overflow-visible border border-slate-700/60 flex items-center">
+              
+              <!-- Checkpoint markers -->
+              <div class="absolute left-1/4 top-0 bottom-0 w-px bg-blue-500/30"></div>
+              <div class="absolute left-1/2 top-0 bottom-0 w-px bg-purple-500/30"></div>
+              <div class="absolute left-3/4 top-0 bottom-0 w-px bg-amber-500/30"></div>
+
+              <!-- Filled wake trail -->
+              <div class="h-full rounded-full transition-all duration-1000 opacity-60" style="width: 3%; background: linear-gradient(90deg, transparent, #06b6d4);">
+              </div>
+
+              <!-- Ship Icon Pin -->
+              <div class="absolute transform -translate-x-1/2 -top-2 transition-all duration-1000 z-10" style="left: 3%;">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-lg border-2 border-amber-300 animate-float" style="background: #06b6d4; color: #07162c;">
+                  <i class="fa-solid fa-sun"></i>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        
+          <div class="relative bg-slate-900/80 rounded-2xl p-3 border border-slate-800">
+            <div class="flex items-center justify-between text-xs mb-1.5">
+              <div class="flex items-center gap-2">
+                <span class="font-cinzel font-black px-2 py-0.5 rounded text-[10px]" style="background-color: #ec489933; color: #ec4899">
+                  #7
+                </span>
+                <span class="font-bold text-slate-200">海妖克拉肯號 (Kraken Fleet)</span>
+                <span class="text-[11px] text-slate-400">(五月天阿信 &amp; 怪獸)</span>
+              </div>
+              <div class="font-mono font-bold text-amber-300">
+                0.0 <span class="text-[10px] text-slate-400">/ 100 點</span>
+              </div>
+            </div>
+
+            <!-- Ocean Track Bar -->
+            <div class="w-full h-5 bg-ocean-950 rounded-full relative overflow-visible border border-slate-700/60 flex items-center">
+              
+              <!-- Checkpoint markers -->
+              <div class="absolute left-1/4 top-0 bottom-0 w-px bg-blue-500/30"></div>
+              <div class="absolute left-1/2 top-0 bottom-0 w-px bg-purple-500/30"></div>
+              <div class="absolute left-3/4 top-0 bottom-0 w-px bg-amber-500/30"></div>
+
+              <!-- Filled wake trail -->
+              <div class="h-full rounded-full transition-all duration-1000 opacity-60" style="width: 3%; background: linear-gradient(90deg, transparent, #ec4899);">
+              </div>
+
+              <!-- Ship Icon Pin -->
+              <div class="absolute transform -translate-x-1/2 -top-2 transition-all duration-1000 z-10" style="left: 3%;">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-lg border-2 border-amber-300 animate-float" style="background: #ec4899; color: #07162c;">
+                  <i class="fa-solid fa-water"></i>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: LEADERBOARD & FLEET OVERVIEW -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Leaderboard (2 Columns on large) -->
+      <section class="lg:col-span-2 parchment-card rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-5">
+            <div>
+              <h2 class="text-lg sm:text-xl font-bold text-amber-300 flex items-center gap-2">
+                <i class="fa-solid fa-trophy text-amber-400"></i>
+                即時艦隊排行榜 (Fleet Leaderboard)
+              </h2>
+              <p class="text-xs text-slate-400">即時計算個人與雙人戰隊總分、合體次數與生效中手牌</p>
+            </div>
+            <span class="text-xs bg-slate-800 text-amber-300 px-3 py-1 rounded-full border border-amber-500/20 font-semibold" id="totalPointsSum">全體總探索點：39.0 點</span>
+          </div>
+
+          <!-- Fleet List Table / Cards -->
+          <div class="space-y-3" id="leaderboardList">
+          <div class="bg-ocean-950/70 hover:bg-ocean-950 border border-amber-500/70 shadow-lg shadow-amber-500/10 rounded-2xl p-3.5 transition flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-8 text-center"><span class="text-amber-400 text-lg"><i class="fa-solid fa-crown"></i> 1</span></div>
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg border border-white/20" style="background-color: #ef444425; color: #ef4444">
+                <i class="fa-solid fa-hat-cowboy"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h4 class="font-bold text-white text-sm sm:text-base">黃金梅利號 (Going Merry)</h4>
+                  <span class="bg-amber-500/20 text-amber-300 text-[10px] px-2 py-0.2 rounded-full border border-amber-500/40">同心協力 × 1</span>
+                </div>
+                <div class="text-xs text-slate-400 mt-0.5 flex flex-wrap gap-2">
+                  <span>搭檔: <strong class="text-slate-200">魯夫</strong> (10點) + <strong class="text-slate-200">索隆</strong> (6點)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Score and Cards Badges -->
+            <div class="flex items-center gap-4 ml-auto">
+              <div class="hidden sm:flex flex-wrap gap-1 max-w-xs justify-end">
+                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-slate-800 border border-amber-500/30 text-amber-300" title="隔日全隊完成之 Demo 分數直接翻倍（每場由 2 點變為 4 點）！">
+            <i class="fa-solid fa-wind"></i> 順風滿帆
+          </span>
+              </div>
+              <div class="text-right min-w-[70px]">
+                <div class="text-lg sm:text-xl font-black font-mono text-amber-300">19.2</div>
+                <div class="text-[10px] text-slate-400 uppercase tracking-wider">探索點數</div>
+              </div>
+            </div>
+          </div>
+        
+          <div class="bg-ocean-950/70 hover:bg-ocean-950 border border-slate-800 rounded-2xl p-3.5 transition flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-8 text-center"><span class="text-slate-300 font-bold text-sm">2</span></div>
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg border border-white/20" style="background-color: #eab30825; color: #eab308">
+                <i class="fa-solid fa-compass"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h4 class="font-bold text-white text-sm sm:text-base">皇家冒險號 (Royal Fortune)</h4>
+                  <span class="bg-amber-500/20 text-amber-300 text-[10px] px-2 py-0.2 rounded-full border border-amber-500/40">同心協力 × 1</span>
+                </div>
+                <div class="text-xs text-slate-400 mt-0.5 flex flex-wrap gap-2">
+                  <span>搭檔: <strong class="text-slate-200">大谷翔平</strong> (5點) + <strong class="text-slate-200">山本由伸</strong> (4點)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Score and Cards Badges -->
+            <div class="flex items-center gap-4 ml-auto">
+              <div class="hidden sm:flex flex-wrap gap-1 max-w-xs justify-end">
+                <span class="text-[11px] text-slate-600">無手牌</span>
+              </div>
+              <div class="text-right min-w-[70px]">
+                <div class="text-lg sm:text-xl font-black font-mono text-amber-300">10.8</div>
+                <div class="text-[10px] text-slate-400 uppercase tracking-wider">探索點數</div>
+              </div>
+            </div>
+          </div>
+        
+          <div class="bg-ocean-950/70 hover:bg-ocean-950 border border-slate-800 rounded-2xl p-3.5 transition flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-8 text-center"><span class="text-amber-600 font-bold text-sm">3</span></div>
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg border border-white/20" style="background-color: #f59e0b25; color: #f59e0b">
+                <i class="fa-solid fa-skull-crossbones"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h4 class="font-bold text-white text-sm sm:text-base">黑珍珠號 (Black Pearl)</h4>
+                  
+                </div>
+                <div class="text-xs text-slate-400 mt-0.5 flex flex-wrap gap-2">
+                  <span>搭檔: <strong class="text-slate-200">林書豪</strong> (9點) + <strong class="text-slate-200">柯瑞</strong> (0點)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Score and Cards Badges -->
+            <div class="flex items-center gap-4 ml-auto">
+              <div class="hidden sm:flex flex-wrap gap-1 max-w-xs justify-end">
+                <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-slate-800 border border-amber-500/30 text-amber-300" title="被動抵擋任何突襲、扣分或強制換水手效果一次；若至賽事結束未使用直接兌換 +3 點！">
+            <i class="fa-solid fa-shield-halved"></i> 絕對免死金牌
+          </span>
+              </div>
+              <div class="text-right min-w-[70px]">
+                <div class="text-lg sm:text-xl font-black font-mono text-amber-300">9.0</div>
+                <div class="text-[10px] text-slate-400 uppercase tracking-wider">探索點數</div>
+              </div>
+            </div>
+          </div>
+        
+          <div class="bg-ocean-950/70 hover:bg-ocean-950 border border-slate-800 rounded-2xl p-3.5 transition flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-8 text-center"><span class="text-slate-500 font-mono text-sm">4</span></div>
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg border border-white/20" style="background-color: #10b98125; color: #10b981">
+                <i class="fa-solid fa-ghost"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h4 class="font-bold text-white text-sm sm:text-base">飛翔荷蘭人 (Flying Dutchman)</h4>
+                  
+                </div>
+                <div class="text-xs text-slate-400 mt-0.5 flex flex-wrap gap-2">
+                  <span>搭檔: <strong class="text-slate-200">陳金鋒</strong> (0點) + <strong class="text-slate-200">彭政閔</strong> (0點)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Score and Cards Badges -->
+            <div class="flex items-center gap-4 ml-auto">
+              <div class="hidden sm:flex flex-wrap gap-1 max-w-xs justify-end">
+                <span class="text-[11px] text-slate-600">無手牌</span>
+              </div>
+              <div class="text-right min-w-[70px]">
+                <div class="text-lg sm:text-xl font-black font-mono text-amber-300">0.0</div>
+                <div class="text-[10px] text-slate-400 uppercase tracking-wider">探索點數</div>
+              </div>
+            </div>
+          </div>
+        
+          <div class="bg-ocean-950/70 hover:bg-ocean-950 border border-slate-800 rounded-2xl p-3.5 transition flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-8 text-center"><span class="text-slate-500 font-mono text-sm">5</span></div>
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg border border-white/20" style="background-color: #8b5cf625; color: #8b5cf6">
+                <i class="fa-solid fa-crown"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h4 class="font-bold text-white text-sm sm:text-base">安妮女王復仇號 (Queen Anne)</h4>
+                  
+                </div>
+                <div class="text-xs text-slate-400 mt-0.5 flex flex-wrap gap-2">
+                  <span>搭檔: <strong class="text-slate-200">張雨生</strong> (0點) + <strong class="text-slate-200">周杰倫</strong> (0點)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Score and Cards Badges -->
+            <div class="flex items-center gap-4 ml-auto">
+              <div class="hidden sm:flex flex-wrap gap-1 max-w-xs justify-end">
+                <span class="text-[11px] text-slate-600">無手牌</span>
+              </div>
+              <div class="text-right min-w-[70px]">
+                <div class="text-lg sm:text-xl font-black font-mono text-amber-300">0.0</div>
+                <div class="text-[10px] text-slate-400 uppercase tracking-wider">探索點數</div>
+              </div>
+            </div>
+          </div>
+        
+          <div class="bg-ocean-950/70 hover:bg-ocean-950 border border-slate-800 rounded-2xl p-3.5 transition flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-8 text-center"><span class="text-slate-500 font-mono text-sm">6</span></div>
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg border border-white/20" style="background-color: #06b6d425; color: #06b6d4">
+                <i class="fa-solid fa-sun"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h4 class="font-bold text-white text-sm sm:text-base">千陽號 (Thousand Sunny)</h4>
+                  
+                </div>
+                <div class="text-xs text-slate-400 mt-0.5 flex flex-wrap gap-2">
+                  <span>搭檔: <strong class="text-slate-200">香吉士</strong> (0點) + <strong class="text-slate-200">娜美</strong> (0點)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Score and Cards Badges -->
+            <div class="flex items-center gap-4 ml-auto">
+              <div class="hidden sm:flex flex-wrap gap-1 max-w-xs justify-end">
+                <span class="text-[11px] text-slate-600">無手牌</span>
+              </div>
+              <div class="text-right min-w-[70px]">
+                <div class="text-lg sm:text-xl font-black font-mono text-amber-300">0.0</div>
+                <div class="text-[10px] text-slate-400 uppercase tracking-wider">探索點數</div>
+              </div>
+            </div>
+          </div>
+        
+          <div class="bg-ocean-950/70 hover:bg-ocean-950 border border-slate-800 rounded-2xl p-3.5 transition flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-8 text-center"><span class="text-slate-500 font-mono text-sm">7</span></div>
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg border border-white/20" style="background-color: #ec489925; color: #ec4899">
+                <i class="fa-solid fa-water"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h4 class="font-bold text-white text-sm sm:text-base">海妖克拉肯號 (Kraken Fleet)</h4>
+                  
+                </div>
+                <div class="text-xs text-slate-400 mt-0.5 flex flex-wrap gap-2">
+                  <span>搭檔: <strong class="text-slate-200">五月天阿信</strong> (0點) + <strong class="text-slate-200">怪獸</strong> (0點)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Score and Cards Badges -->
+            <div class="flex items-center gap-4 ml-auto">
+              <div class="hidden sm:flex flex-wrap gap-1 max-w-xs justify-end">
+                <span class="text-[11px] text-slate-600">無手牌</span>
+              </div>
+              <div class="text-right min-w-[70px]">
+                <div class="text-lg sm:text-xl font-black font-mono text-amber-300">0.0</div>
+                <div class="text-[10px] text-slate-400 uppercase tracking-wider">探索點數</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-slate-700/50 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2">
+          <span>*同心協力次數：同日雙人皆有產出並獲得 1.2 倍加成的天數</span>
+          <button onclick="exportDataBackup()" class="text-amber-400 hover:text-amber-300 flex items-center gap-1">
+            <i class="fa-solid fa-download"></i> 導出競賽紀錄 JSON
+          </button>
+        </div>
+      </section>
+
+      <!-- Active Effects & Ship Stash (Right Column) -->
+      <section class="parchment-card rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-amber-300 flex items-center gap-2">
+            <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
+            航海事件卡牌庫存
+          </h2>
+          <span class="text-xs bg-rose-950 text-rose-300 px-2 py-0.5 rounded-full border border-rose-800/50 font-bold" id="activeCardsCount">2 張生效/持有中</span>
+        </div>
+        <p class="text-xs text-slate-300 mb-4">
+          展示各隊目前持有、已排定生效日或使用完畢的卡牌狀態。
+        </p>
+
+        <!-- Stash List container -->
+        <div id="cardStashList" class="flex-1 space-y-3 max-h-[500px] overflow-y-auto pr-1">
+          <div class="bg-slate-900/90 border border-slate-700/60 rounded-xl p-3 flex items-start justify-between gap-2 text-xs">
+            <div class="flex items-start gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mt-0.5">
+                <i class="fa-solid fa-wind"></i>
+              </div>
+              <div>
+                <div class="font-bold text-amber-300 flex items-center gap-1.5">
+                  順風滿帆
+                  <span class="bg-blue-900/80 text-blue-200 border border-blue-600 px-2 py-0.5 rounded text-[10px]">預定: 2026-11-05</span>
+                </div>
+                <div class="text-[11px] text-slate-400 mt-0.5">
+                  持有者: <strong class="text-slate-200">黃金梅利號 (Going Merry)</strong>
+                </div>
+                <div class="text-[11px] text-slate-400 leading-snug mt-1">
+                  隔日全隊完成之 Demo 分數直接翻倍（每場由 2 點變為 4 點）！
+                </div>
+              </div>
+            </div>
+          </div>
+        
+          <div class="bg-slate-900/90 border border-slate-700/60 rounded-xl p-3 flex items-start justify-between gap-2 text-xs">
+            <div class="flex items-start gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mt-0.5">
+                <i class="fa-solid fa-shield-halved"></i>
+              </div>
+              <div>
+                <div class="font-bold text-amber-300 flex items-center gap-1.5">
+                  絕對免死金牌
+                  <span class="bg-amber-900/80 text-amber-200 border border-amber-600 px-2 py-0.5 rounded text-[10px]">在庫待用</span>
+                </div>
+                <div class="text-[11px] text-slate-400 mt-0.5">
+                  持有者: <strong class="text-slate-200">黑珍珠號 (Black Pearl)</strong>
+                </div>
+                <div class="text-[11px] text-slate-400 leading-snug mt-1">
+                  被動抵擋任何突襲、扣分或強制換水手效果一次；若至賽事結束未使用直接兌換 +3 點！
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-slate-700/50">
+          <button onclick="openCardManagementModal()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-amber-500/30 text-amber-300 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            管理卡牌標記與生效日期
+          </button>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- SECTION 3: RECENT ACTIVITY LOG -->
+    <section class="parchment-card rounded-3xl p-5 sm:p-6 shadow-2xl">
+      <div class="flex flex-wrap items-center justify-between mb-4 gap-2">
+        <div>
+          <h2 class="text-lg font-bold text-amber-300 flex items-center gap-2">
+            <i class="fa-solid fa-list-check text-amber-400"></i>
+            每日分數繳交與歷史航海日誌
+          </h2>
+          <p class="text-xs text-slate-400">每次提交皆有完整指標紀錄與合體技標記，可隨時核對或修正</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="text" id="logSearchInput" oninput="renderScoreLogs()" placeholder="搜尋隊伍或日期..." class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-400">
+        </div>
+      </div>
+
+      <!-- Logs Table -->
+      <div class="overflow-x-auto rounded-xl border border-slate-700/50">
+        <table class="w-full text-left text-xs text-slate-300">
+          <thead class="bg-ocean-950 text-amber-300 uppercase font-bold text-[11px] border-b border-slate-700">
+            <tr>
+              <th class="py-3 px-4">航海日期</th>
+              <th class="py-3 px-4">戰隊名稱</th>
+              <th class="py-3 px-4">隊員 A 戰果</th>
+              <th class="py-3 px-4">隊員 B 戰果</th>
+              <th class="py-3 px-4 text-center">同心協力加成</th>
+              <th class="py-3 px-4 text-right">當日結算點數</th>
+              <th class="py-3 px-4 text-center">抽卡資格</th>
+              <th class="py-3 px-4 text-center">管理</th>
+            </tr>
+          </thead>
+          <tbody id="logsTableBody" class="divide-y divide-slate-800">
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="py-3 px-4 font-mono">2026-11-05</td>
+            <td class="py-3 px-4 font-bold text-slate-200">皇家冒險號 (Royal Fortune)</td>
+            <td class="py-3 px-4 text-[11px]">
+              <span class="text-amber-200">大谷翔平</span>: 
+              邀約1 / 實出1 / 線出0 / Demo1 / 成交0
+            </td>
+            <td class="py-3 px-4 text-[11px]">
+              <span class="text-amber-200">山本由伸</span>: 
+              邀約1 / 實出0 / 線出1 / Demo1 / 成交0
+            </td>
+            <td class="py-3 px-4 text-center">
+              <span class="bg-emerald-950 text-emerald-300 border border-emerald-600 px-2 py-0.5 rounded-full text-[10px] font-bold">× 1.2 倍觸發</span>
+            </td>
+            <td class="py-3 px-4 text-right font-mono font-bold text-amber-300 text-sm">
+              10.8 點
+            </td>
+            <td class="py-3 px-4 text-center">
+              <span class="text-rose-400 font-bold flex items-center justify-center gap-1 text-[11px]"><i class="fa-solid fa-gift"></i> 可抽卡</span>
+            </td>
+            <td class="py-3 px-4 text-center">
+              <button onclick="deleteLogEntry('log-3')" class="text-slate-500 hover:text-rose-400 p-1 transition" title="刪除本筆紀錄">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </td>
+          </tr>
+        
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="py-3 px-4 font-mono">2026-11-04</td>
+            <td class="py-3 px-4 font-bold text-slate-200">黑珍珠號 (Black Pearl)</td>
+            <td class="py-3 px-4 text-[11px]">
+              <span class="text-amber-200">林書豪</span>: 
+              邀約2 / 實出1 / 線出1 / Demo2 / 成交0
+            </td>
+            <td class="py-3 px-4 text-[11px]">
+              <span class="text-amber-200">柯瑞</span>: 
+              邀約0 / 實出0 / 線出0 / Demo0 / 成交0
+            </td>
+            <td class="py-3 px-4 text-center">
+              <span class="text-slate-500 text-[10px]">無加成</span>
+            </td>
+            <td class="py-3 px-4 text-right font-mono font-bold text-amber-300 text-sm">
+              9.0 點
+            </td>
+            <td class="py-3 px-4 text-center">
+              <span class="text-rose-400 font-bold flex items-center justify-center gap-1 text-[11px]"><i class="fa-solid fa-gift"></i> 可抽卡</span>
+            </td>
+            <td class="py-3 px-4 text-center">
+              <button onclick="deleteLogEntry('log-2')" class="text-slate-500 hover:text-rose-400 p-1 transition" title="刪除本筆紀錄">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </td>
+          </tr>
+        
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="py-3 px-4 font-mono">2026-11-04</td>
+            <td class="py-3 px-4 font-bold text-slate-200">黃金梅利號 (Going Merry)</td>
+            <td class="py-3 px-4 text-[11px]">
+              <span class="text-amber-200">魯夫</span>: 
+              邀約1 / 實出0 / 線出2 / Demo1 / 成交1
+            </td>
+            <td class="py-3 px-4 text-[11px]">
+              <span class="text-amber-200">索隆</span>: 
+              邀約1 / 實出1 / 線出1 / Demo1 / 成交0
+            </td>
+            <td class="py-3 px-4 text-center">
+              <span class="bg-emerald-950 text-emerald-300 border border-emerald-600 px-2 py-0.5 rounded-full text-[10px] font-bold">× 1.2 倍觸發</span>
+            </td>
+            <td class="py-3 px-4 text-right font-mono font-bold text-amber-300 text-sm">
+              19.2 點
+            </td>
+            <td class="py-3 px-4 text-center">
+              <span class="text-rose-400 font-bold flex items-center justify-center gap-1 text-[11px]"><i class="fa-solid fa-gift"></i> 可抽卡</span>
+            </td>
+            <td class="py-3 px-4 text-center">
+              <button onclick="deleteLogEntry('log-1')" class="text-slate-500 hover:text-rose-400 p-1 transition" title="刪除本筆紀錄">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 1: 每日得分輸入 (DAILY SCORE ENTRY MODAL) -->
+  <!-- ======================================================== -->
+  <div id="scoreModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-3 overflow-y-auto">
+    <div class="bg-ocean-900 border-2 border-amber-600/50 rounded-2xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl relative my-auto">
+      
+      <!-- Modal Header -->
+      <div class="p-4 sm:p-5 border-b border-amber-600/30 flex items-center justify-between bg-ocean-950/80 rounded-t-2xl">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/40">
+            <i class="fa-solid fa-feather-pointed text-lg"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-amber-300">登記每日得分戰果</h3>
+            <p class="text-xs text-slate-400">分別填入兩位組員今日各項指標，系統自動核算加成</p>
+          </div>
+        </div>
+        <button onclick="closeScoreModal()" class="text-slate-400 hover:text-white p-2">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body (Form) -->
+      <form id="dailyScoreForm" onsubmit="handleScoreSubmit(event)" class="p-4 sm:p-6 space-y-5 overflow-y-auto">
+        <!-- Date & Team Select -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-amber-200 mb-1">📅 結算日期</label>
+            <input type="date" id="scoreEntryDate" required="" class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-2 text-sm text-white focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-amber-200 mb-1">🏴‍☠️ 選擇戰隊 (7隊)</label>
+            <select id="scoreEntryTeamId" onchange="updateMemberLabelsForScoreModal()" required="" class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-2 text-sm text-white focus:outline-none"><option value="T1">黑珍珠號 (Black Pearl) (林書豪 &amp; 柯瑞)</option><option value="T2">飛翔荷蘭人 (Flying Dutchman) (陳金鋒 &amp; 彭政閔)</option><option value="T3">黃金梅利號 (Going Merry) (魯夫 &amp; 索隆)</option><option value="T4">安妮女王復仇號 (Queen Anne) (張雨生 &amp; 周杰倫)</option><option value="T5">千陽號 (Thousand Sunny) (香吉士 &amp; 娜美)</option><option value="T6">海妖克拉肯號 (Kraken Fleet) (五月天阿信 &amp; 怪獸)</option><option value="T7">皇家冒險號 (Royal Fortune) (大谷翔平 &amp; 山本由伸)</option></select>
+          </div>
+        </div>
+
+        <!-- Two Members Scoring Inputs -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          <!-- Member 1 Card -->
+          <div class="bg-ocean-950/80 border border-slate-700/60 rounded-xl p-3.5 space-y-3">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+              <span class="font-bold text-amber-300 text-sm flex items-center gap-1.5">
+                <i class="fa-solid fa-user-ninja text-amber-400"></i>
+                <span id="memberANameLabel">隊員 A</span>
+              </span>
+              <span id="subtotalA" class="text-xs bg-slate-800 text-amber-300 px-2 py-0.5 rounded font-mono">0 點</span>
+            </div>
+
+            <div class="space-y-2 text-xs">
+              <div>
+                <label class="text-slate-300 flex justify-between">
+                  <span>邀約 3 人含問卷 (+1 點)</span>
+                  <span class="text-slate-400">次數</span>
+                </label>
+                <input type="number" min="0" value="0" id="m1_invite" oninput="calculatePreviewScore()" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
+              </div>
+              <div>
+                <label class="text-slate-300 flex justify-between">
+                  <span>客戶實際【線上】出席 (+1 點/位)</span>
+                  <span class="text-slate-400">人數</span>
+                </label>
+                <input type="number" min="0" value="0" id="m1_attendOnline" oninput="calculatePreviewScore()" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
+              </div>
+              <div>
+                <label class="text-slate-300 flex justify-between">
+                  <span>客戶實際【實體/線下】出席 (+2 點/位)</span>
+                  <span class="text-slate-400">人數</span>
+                </label>
+                <input type="number" min="0" value="0" id="m1_attendOffline" oninput="calculatePreviewScore()" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
+              </div>
+              <div>
+                <label class="text-slate-300 flex justify-between">
+                  <span>完成 Demo (+2 點/場)</span>
+                  <span class="text-slate-400">場數</span>
+                </label>
+                <input type="number" min="0" value="0" id="m1_demo" oninput="calculatePreviewScore()" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
+              </div>
+              <div>
+                <label class="text-slate-300 flex justify-between">
+                  <span>正式成交 (+5 點/筆)</span>
+                  <span class="text-slate-400">筆數</span>
+                </label>
+                <input type="number" min="0" value="0" id="m1_deal" oninput="calculatePreviewScore()" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-amber-300 font-bold">
+              </div>
+            </div>
+          </div>
+
+          <!-- Member 2 Card -->
+          <div class="bg-ocean-950/80 border border-slate-700/60 rounded-xl p-3.5 space-y-3">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+              <span class="font-bold text-amber-300 text-sm flex items-center gap-1.5">
+                <i class="fa-solid fa-user-astronaut text-amber-400"></i>
+                <span id="memberBNameLabel">隊員 B</span>
+              </span>
+              <span id="subtotalB" class="text-xs bg-slate-800 text-amber-300 px-2 py-0.5 rounded font-mono">0 點</span>
+            </div>
+
+            <div class="space-y-2 text-xs">
+              <div>
+                <label class="text-slate-300 flex justify-between">
+                  <span>邀約 3 人含問卷 (+1 點)</span>
+                  <span class="text-slate-400">次數</span>
+                </label>
+                <input type="number" min="0" value="0" id="m2_invite" oninput="calculatePreviewScore()" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
+              </div>
+              <div>
+                <label class="text-slate-300 flex justify-between">
+                  <span>客戶實際【線上】出席 (+1 點/位)</span>
+                  <span class="text-slate-400">人數</span>
+                </label>
+                <input type="number" min="0" value="0" id="m2_attendOnline" oninput="calculatePreviewScore()" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
+              </div>
+              <div>
+                <label class="text-slate-300 flex justify-between">
+                  <span>客戶實際【實體/線下】出席 (+2 點/位)</span>
+                  <span class="text-slate-400">人數</span>
+                </label>
+                <input type="number" min="0" value="0" id="m2_attendOffline" oninput="calculatePreviewScore()" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
+              </div>
+              <div>
+                <label class="text-slate-300 flex justify-between">
+                  <span>完成 Demo (+2 點/場)</span>
+                  <span class="text-slate-400">場數</span>
+                </label>
+                <input type="number" min="0" value="0" id="m2_demo" oninput="calculatePreviewScore()" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white">
+              </div>
+              <div>
+                <label class="text-slate-300 flex justify-between">
+                  <span>正式成交 (+5 點/筆)</span>
+                  <span class="text-slate-400">筆數</span>
+                </label>
+                <input type="number" min="0" value="0" id="m2_deal" oninput="calculatePreviewScore()" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-amber-300 font-bold">
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Preview Calculation Box -->
+        <div class="bg-amber-950/30 border border-amber-600/40 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-3">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-slate-300">合夥連帶判定：</span>
+              <span id="comboBadge" class="text-xs px-2 py-0.5 rounded-full font-bold bg-slate-800 text-slate-400">
+                未達成同心協力
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-400" id="comboDescription">雙方皆需有至少 1 項產出以觸發 1.2 倍加成</p>
+          </div>
+
+          <div class="text-right">
+            <div class="text-[11px] text-amber-200/80">預估當日結算總點數</div>
+            <div class="text-2xl font-black font-mono text-amber-300" id="previewFinalPoints">0.0 <span class="text-xs font-normal">點</span></div>
+          </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="pt-2 flex items-center justify-end gap-3">
+          <button type="button" onclick="closeScoreModal()" class="px-4 py-2 text-xs rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+            取消
+          </button>
+          <button type="submit" class="px-6 py-2 text-xs font-bold rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 shadow-lg shadow-amber-500/20 transition">
+            儲存今日戰果
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 2: 航海事件抽卡中心 (GACHA DRAW MODAL) -->
+  <!-- ======================================================== -->
+  <div id="gachaModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 overflow-y-auto">
+    <div class="bg-ocean-900 border-2 border-amber-500 rounded-3xl w-full max-w-xl p-5 sm:p-7 shadow-2xl relative my-auto text-center">
+      
+      <!-- Close button -->
+      <button onclick="closeGachaModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="mb-5">
+        <span class="text-xs uppercase tracking-widest text-amber-400 font-cinzel font-bold">Fortune of the High Seas</span>
+        <h3 class="text-2xl font-black text-amber-300 mt-1 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-dice-d20 text-rose-500"></i>
+          航海事件卡牌抽卡機
+        </h3>
+        <p class="text-xs text-slate-300 mt-1 max-w-sm mx-auto">
+          當日結算達 5 點以上即可獲取抽卡權限。抽得之卡片將自動進入隊伍手牌庫存！
+        </p>
+      </div>
+
+      <!-- Select Drawing Team -->
+      <div class="max-w-xs mx-auto mb-6 text-left">
+        <label class="block text-xs font-semibold text-amber-200 mb-1 text-center">選擇抽卡戰隊</label>
+        <select id="gachaTeamSelect" class="w-full bg-slate-950 border border-amber-600/50 rounded-xl px-3 py-2 text-sm text-amber-200 focus:outline-none text-center"><option value="T1">黑珍珠號 (Black Pearl) (林書豪 &amp; 柯瑞)</option><option value="T2">飛翔荷蘭人 (Flying Dutchman) (陳金鋒 &amp; 彭政閔)</option><option value="T3">黃金梅利號 (Going Merry) (魯夫 &amp; 索隆)</option><option value="T4">安妮女王復仇號 (Queen Anne) (張雨生 &amp; 周杰倫)</option><option value="T5">千陽號 (Thousand Sunny) (香吉士 &amp; 娜美)</option><option value="T6">海妖克拉肯號 (Kraken Fleet) (五月天阿信 &amp; 怪獸)</option><option value="T7">皇家冒險號 (Royal Fortune) (大谷翔平 &amp; 山本由伸)</option></select>
+      </div>
+
+      <!-- Gacha Interactive Card Stage -->
+      <div class="perspective-1000 my-6 flex justify-center">
+        <div id="gachaCard" class="w-64 h-96 relative transform-style-3d transition-transform duration-700 cursor-pointer" onclick="triggerCardFlip()">
+          
+          <!-- Card Back (Default Face) -->
+          <div class="absolute inset-0 backface-hidden bg-gradient-to-br from-amber-700 via-amber-900 to-ocean-950 rounded-2xl border-4 border-amber-400 p-4 flex flex-col items-center justify-between shadow-2xl">
+            <div class="w-full border border-amber-400/40 rounded-xl p-2 text-[10px] tracking-widest text-amber-200 uppercase font-cinzel">
+              Secret Arcana
+            </div>
+            <div class="text-center">
+              <div class="w-20 h-20 mx-auto rounded-full bg-amber-500/20 border-2 border-amber-400 flex items-center justify-center animate-pulse-gold">
+                <i class="fa-solid fa-skull-crossbones text-4xl text-amber-300"></i>
+              </div>
+              <div class="mt-4 font-cinzel font-black text-amber-300 text-lg">PIRATE DECK</div>
+              <p class="text-xs text-amber-200/70 mt-1">點擊卡牌翻開命運之刃</p>
+            </div>
+            <div class="text-[10px] text-amber-400/80 font-mono">5大神秘事件卡</div>
+          </div>
+
+          <!-- Card Front (Revealed Result) -->
+          <div id="gachaCardFront" class="absolute inset-0 backface-hidden rotate-y-180 bg-gradient-to-b from-ocean-950 via-slate-900 to-ocean-900 rounded-2xl border-4 border-amber-400 p-5 flex flex-col justify-between shadow-2xl text-left">
+            <div>
+              <div class="flex items-center justify-between">
+                <span id="gachaRarity" class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500 text-slate-950 font-mono">LEGENDARY</span>
+                <span id="gachaCategory" class="text-xs text-slate-400 font-mono">博弈事件</span>
+              </div>
+              <div class="text-center my-4">
+                <div id="gachaIconWrapper" class="w-16 h-16 mx-auto rounded-2xl bg-amber-500/20 border border-amber-400/60 flex items-center justify-center text-3xl text-amber-300 mb-2">
+                  <i id="gachaIcon" class="fa-solid fa-wind"></i>
+                </div>
+                <h4 id="gachaCardName" class="text-lg font-black text-amber-300">順風滿帆</h4>
+              </div>
+              <p id="gachaCardDesc" class="text-xs text-slate-300 leading-relaxed bg-ocean-900/80 p-3 rounded-xl border border-slate-700">
+                隔日全隊 Demo 分數翻倍！
+              </p>
+            </div>
+
+            <div class="pt-2 text-center">
+              <span class="text-[11px] text-emerald-400 font-bold flex items-center justify-center gap-1">
+                <i class="fa-solid fa-circle-check"></i> 已自動存入該隊手牌庫存
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <div class="mt-4 flex items-center justify-center gap-3">
+        <button id="drawCardBtn" onclick="executeDrawCard()" class="px-8 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 text-slate-950 font-black text-sm shadow-xl shadow-amber-500/30 transform active:scale-95 transition">
+          <i class="fa-solid fa-sparkles mr-1"></i> 立即抽取事件卡！
+        </button>
+        <button id="resetCardBtn" onclick="resetCardView()" class="hidden px-5 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition">
+          再抽一張
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 3: 卡牌標記與生效日期管理 (CARD MANAGEMENT MODAL) -->
+  <!-- ======================================================== -->
+  <div id="cardManageModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-3 overflow-y-auto">
+    <div class="bg-ocean-900 border-2 border-amber-600/50 rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl relative my-auto">
+      
+      <div class="p-4 sm:p-5 border-b border-amber-600/30 flex items-center justify-between bg-ocean-950/80 rounded-t-2xl">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/40">
+            <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-amber-300">手牌標記與生效日期排程</h3>
+            <p class="text-xs text-slate-400">安排卡片預定生效日、標記為已使用或註銷紀錄</p>
+          </div>
+        </div>
+        <button onclick="closeCardManagementModal()" class="text-slate-400 hover:text-white p-2">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Content -->
+      <div class="p-4 sm:p-6 overflow-y-auto space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <span class="text-xs text-slate-300">所有抽取記錄均保留於此，可隨時指定哪天生效：</span>
+          <button onclick="manuallyAddCardPrompt()" class="text-xs text-amber-300 bg-amber-500/20 hover:bg-amber-500/30 px-3 py-1.5 rounded-lg border border-amber-500/40 font-bold">
+            + 手動發卡給指定隊伍
+          </button>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl border border-slate-700/60">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-ocean-950 text-amber-300 uppercase font-bold text-[11px] border-b border-slate-700">
+              <tr>
+                <th class="py-3 px-3">抽卡時間</th>
+                <th class="py-3 px-3">持有戰隊</th>
+                <th class="py-3 px-3">卡片名稱</th>
+                <th class="py-3 px-3">預計生效/使用日期</th>
+                <th class="py-3 px-3 text-center">當前狀態</th>
+                <th class="py-3 px-3 text-center">動作</th>
+              </tr>
+            </thead>
+            <tbody id="cardManageTableBody" class="divide-y divide-slate-800">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="p-4 border-t border-slate-800 text-right">
+        <button onclick="closeCardManagementModal()" class="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl text-xs font-bold transition">
+          完成設定
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 4: 組別設定 (TEAM CONFIGURATION MODAL) -->
+  <!-- ======================================================== -->
+  <div id="configModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-3 overflow-y-auto">
+    <div class="bg-ocean-900 border-2 border-amber-600/50 rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl relative my-auto">
+      
+      <div class="p-4 sm:p-5 border-b border-amber-600/30 flex items-center justify-between bg-ocean-950/80 rounded-t-2xl">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/40">
+            <i class="fa-solid fa-users-gear text-lg"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-amber-300">戰隊編制與成員設定 (7 隊 14 人)</h3>
+            <p class="text-xs text-slate-400">自訂隊伍船名、隊員真實姓名與標誌色</p>
+          </div>
+        </div>
+        <button onclick="closeConfigModal()" class="text-slate-400 hover:text-white p-2">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Form for 7 teams -->
+      <div class="p-4 sm:p-6 overflow-y-auto space-y-4" id="teamConfigList">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Footer Buttons -->
+      <div class="p-4 border-t border-slate-800 flex items-center justify-between">
+        <button onclick="resetDefaultTeams()" class="text-xs text-rose-400 hover:text-rose-300 underline">
+          恢復預設艦隊名稱
+        </button>
+        <div class="flex gap-2">
+          <button onclick="closeConfigModal()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs">
+            取消
+          </button>
+          <button onclick="saveTeamConfigs()" class="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl text-xs font-bold transition">
+            儲存戰隊設定
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 5: 競賽與卡牌規則說明 (RULES MODAL) -->
+  <!-- ======================================================== -->
+  <div id="rulesModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-3 overflow-y-auto">
+    <div class="bg-ocean-900 border-2 border-amber-600/50 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl relative my-auto">
+      
+      <div class="p-4 sm:p-5 border-b border-amber-600/30 flex items-center justify-between bg-ocean-950/80 rounded-t-2xl">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/40">
+            <i class="fa-solid fa-scroll text-lg"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-amber-300">【雙人奪寶戰：航海大冒險】規則手冊</h3>
+            <p class="text-xs text-slate-400">行動換算 × 1.2倍同心協力 × 航海事件卡</p>
+          </div>
+        </div>
+        <button onclick="closeRulesModal()" class="text-slate-400 hover:text-white p-2">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="p-5 overflow-y-auto text-xs text-slate-300 space-y-4 leading-relaxed">
+        <div class="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
+          <h4 class="font-bold text-amber-400 text-sm mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-bullseye"></i> 基礎探索點數換算
+          </h4>
+          <ul class="list-disc list-inside space-y-1 text-slate-300">
+            <li><strong class="text-white">邀約 3 人（含問卷）</strong>：<span class="text-amber-300 font-bold">+1 點</span></li>
+            <li><strong class="text-white">客戶實際【線上】出席</strong>：<span class="text-amber-300 font-bold">+1 點</span> / 位</li>
+            <li><strong class="text-white">客戶實際【實體/線下】出席</strong>：<span class="text-amber-300 font-bold">+2 點</span> / 位</li>
+            <li><strong class="text-white">完成 Demo</strong>：<span class="text-amber-300 font-bold">+2 點</span> / 場</li>
+            <li><strong class="text-white">正式成交</strong>：<span class="text-amber-300 font-bold">+5 點</span> / 筆</li>
+          </ul>
+        </div>
+
+        <div class="bg-amber-950/20 p-3.5 rounded-xl border border-amber-600/30">
+          <h4 class="font-bold text-amber-300 text-sm mb-1 flex items-center gap-2">
+            <i class="fa-solid fa-handshake-angle"></i> 合夥合作機制：合體技（同心協力）
+          </h4>
+          <p>
+            同組兩名隊員在當天「<strong class="text-white">皆有產出至少 1 項指標</strong>」（例如 A 有邀約、B 有出席），當日全隊結算點數直接 <strong class="text-amber-300 font-bold">× 1.2 倍</strong>！一人單飛一人掛零則僅計基本分，無加成。
+          </p>
+        </div>
+
+        <div class="bg-rose-950/20 p-3.5 rounded-xl border border-rose-600/30">
+          <h4 class="font-bold text-rose-300 text-sm mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> 航海事件卡牌池 (當日全隊 $\ge$ 5 點可抽)
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+            <div class="bg-slate-900 p-2.5 rounded-lg border border-slate-700">
+              <span class="font-bold text-amber-300">💨 順風滿帆</span>
+              <p class="text-slate-400 mt-0.5">隔日全隊 Demo 分數翻倍（每場變 4 點）。</p>
+            </div>
+            <div class="bg-slate-900 p-2.5 rounded-lg border border-slate-700">
+              <span class="font-bold text-amber-300">🍷 朗姆酒同盟</span>
+              <p class="text-slate-400 mt-0.5">指定一組隊伍，平分雙方隔日總積分，共享成果！</p>
+            </div>
+            <div class="bg-slate-900 p-2.5 rounded-lg border border-slate-700">
+              <span class="font-bold text-amber-300">🏴‍☠️ 黑鬍子突襲</span>
+              <p class="text-slate-400 mt-0.5">指定目前領先隊伍隔日必須完成至少 1 場 Demo，否則扣 4 點。</p>
+            </div>
+            <div class="bg-slate-900 p-2.5 rounded-lg border border-slate-700">
+              <span class="font-bold text-amber-300">🔄 換水手卡（乾坤大挪移）</span>
+              <p class="text-slate-400 mt-0.5">指定一名隊員與其他隊伍隨機抽出一人互換，隊員攜帶個人累積總分移轉！</p>
+            </div>
+            <div class="bg-slate-900 p-2.5 rounded-lg border border-slate-700">
+              <span class="font-bold text-amber-300">🛡️ 絕對免死金牌</span>
+              <p class="text-slate-400 mt-0.5">抵擋一次負面攻擊或強制換隊員；若至賽事結束未使用可兌換 +3 點。</p>
+            </div>
+            <div class="bg-slate-900 p-2.5 rounded-lg border border-slate-700">
+              <span class="font-bold text-amber-300">🎲 雙面賭徒（俄羅斯輪盤）</span>
+              <p class="text-slate-400 mt-0.5">當日結算擲骰：雙數點數 ×2 倍，單數點數減半 (×0.5)。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 border-t border-slate-800 text-right">
+        <button onclick="closeRulesModal()" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition">
+          關閉
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 6: 一鍵部署到協作平台 (ONE-CLICK DEPLOY MODAL) -->
+  <!-- ======================================================== -->
+  <div id="deployModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 overflow-y-auto">
+    <div class="bg-ocean-900 border-2 border-emerald-500/80 rounded-2xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl relative my-auto">
+      
+      <!-- Modal Header -->
+      <div class="p-4 sm:p-5 border-b border-emerald-600/30 flex items-center justify-between bg-ocean-950/80 rounded-t-2xl">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/40">
+            <i class="fa-solid fa-cloud-arrow-up text-lg"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-emerald-300">一鍵部署到協作平台 / 上線發布</h3>
+            <p class="text-xs text-slate-400">支援 Google Sites（Google 協作平台）、靜態網址與手機直接開啟</p>
+          </div>
+        </div>
+        <button onclick="closeDeployModal()" class="text-slate-400 hover:text-white p-2">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-4 sm:p-6 overflow-y-auto space-y-5 text-xs text-slate-300">
+        
+        <!-- Option 1: Google 協作平台 (Google Sites) -->
+        <div class="bg-ocean-950 p-4 rounded-xl border border-emerald-500/30 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-emerald-300 text-sm flex items-center gap-2">
+              <i class="fa-brands fa-google text-emerald-400"></i>
+              方式一：嵌入到 Google 協作平台 (Google Sites)
+            </span>
+            <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded text-[10px] font-bold">最推薦</span>
+          </div>
+          <p class="text-slate-300 leading-relaxed text-[11px]">
+            在 Google 協作平台編輯頁面右側，點擊「<strong>嵌入</strong>」➔ 選擇「<strong>嵌入程式碼</strong>」，將下方完整程式碼貼上後按儲存，整個系統就會無縫在你的協作平台內運作！
+          </p>
+          <div class="flex items-center gap-2">
+            <button onclick="copyFullHtmlCode()" class="flex-1 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 text-slate-950 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/20 transition">
+              <i class="fa-solid fa-copy"></i>
+              <span>一鍵複製完整 HTML 嵌入程式碼</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Option 2: 免費生成獨立公開網址 (Tiiny.host / Vercel) -->
+        <div class="bg-ocean-950 p-4 rounded-xl border border-slate-700/60 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-amber-300 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-globe text-amber-400"></i>
+              方式二：一鍵下載檔案並發布成公開網址 (發給 LINE 群)
+            </span>
+          </div>
+          <p class="text-slate-300 text-[11px] leading-relaxed">
+            下載獨立的 <code class="text-amber-300 bg-slate-900 px-1 py-0.5 rounded">index.html</code> 檔案，直接拖曳到免費託管服務（如 <strong>tiiny.host</strong> 或 <strong>netlify drop</strong>），3 秒鐘內就能產生專屬公開網址分享給 14 位夥伴：
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button onclick="downloadHtmlFile()" class="py-2.5 bg-slate-800 hover:bg-slate-700 border border-amber-500/40 text-amber-300 font-bold rounded-xl flex items-center justify-center gap-1.5 transition">
+              <i class="fa-solid fa-file-arrow-down"></i>
+              下載 index.html 檔案
+            </button>
+            <a href="https://tiiny.host" target="_blank" class="py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-bold rounded-xl flex items-center justify-center gap-1.5 transition" rel="noopener noreferrer">
+              <i class="fa-solid fa-up-right-from-square"></i>
+              前往 Tiiny.host 一鍵上傳
+            </a>
+          </div>
+        </div>
+
+        <!-- Option 3: 直接全螢幕獨立運行 -->
+        <div class="bg-ocean-950/60 p-3 rounded-xl border border-slate-800 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-mobile-screen text-slate-400 text-base"></i>
+            <span class="text-[11px] text-slate-300">也可以直接將下載的 html 檔案直接發送到 LINE 群，隊員點開就能看！</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="p-4 border-t border-slate-800 text-right">
+        <button onclick="closeDeployModal()" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition">
+          關閉
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- APPLICATION JAVASCRIPT LOGIC -->
+  <script>
+    // ==========================================
+    // 1. DATA MODEL & INITIAL CONFIGURATION
+    // ==========================================
+    const DEFAULT_TEAMS = [
+      { id: 'T1', name: '黑珍珠號 (Black Pearl)', memberA: '林書豪', memberB: '柯瑞', color: '#f59e0b', icon: 'fa-skull-crossbones' },
+      { id: 'T2', name: '飛翔荷蘭人 (Flying Dutchman)', memberA: '陳金鋒', memberB: '彭政閔', color: '#10b981', icon: 'fa-ghost' },
+      { id: 'T3', name: '黃金梅利號 (Going Merry)', memberA: '魯夫', memberB: '索隆', color: '#ef4444', icon: 'fa-hat-cowboy' },
+      { id: 'T4', name: '安妮女王復仇號 (Queen Anne)', memberA: '張雨生', memberB: '周杰倫', color: '#8b5cf6', icon: 'fa-crown' },
+      { id: 'T5', name: '千陽號 (Thousand Sunny)', memberA: '香吉士', memberB: '娜美', color: '#06b6d4', icon: 'fa-sun' },
+      { id: 'T6', name: '海妖克拉肯號 (Kraken Fleet)', memberA: '五月天阿信', memberB: '怪獸', color: '#ec4899', icon: 'fa-water' },
+      { id: 'T7', name: '皇家冒險號 (Royal Fortune)', memberA: '大谷翔平', memberB: '山本由伸', color: '#eab308', icon: 'fa-compass' },
+    ];
+
+    const CARD_DATABASE = [
+      {
+        id: 'C1',
+        name: '順風滿帆',
+        category: '增益卡',
+        rarity: 'RARE',
+        icon: 'fa-wind',
+        desc: '隔日全隊完成之 Demo 分數直接翻倍（每場由 2 點變為 4 點）！',
+        color: '#3b82f6'
+      },
+      {
+        id: 'C2',
+        name: '朗姆酒同盟',
+        category: '社交共生',
+        rarity: 'EPIC',
+        icon: 'fa-wine-bottle',
+        desc: '指定另一組隊伍為盟友，平分雙方隔日結算之總點數，榮辱與共！',
+        color: '#8b5cf6'
+      },
+      {
+        id: 'C3',
+        name: '黑鬍子突襲',
+        category: '狙擊卡',
+        rarity: 'LEGENDARY',
+        icon: 'fa-skull',
+        desc: '指定目前榜首隊伍，該隊隔日必須產出至少 1 場 Demo，否則立即扣除 4 點！',
+        color: '#dc2626'
+      },
+      {
+        id: 'C4',
+        name: '換水手卡 (乾坤大挪移)',
+        category: '大洗牌',
+        rarity: 'CHAOS',
+        icon: 'fa-shuffle',
+        desc: '指定自家 1 名隊員與另一隊隨機抽籤隊員互換，該隊員帶著累積個人戰功分跳槽！',
+        color: '#f59e0b'
+      },
+      {
+        id: 'C5',
+        name: '絕對免死金牌',
+        category: '防護卡',
+        rarity: 'EPIC',
+        icon: 'fa-shield-halved',
+        desc: '被動抵擋任何突襲、扣分或強制換水手效果一次；若至賽事結束未使用直接兌換 +3 點！',
+        color: '#10b981'
+      },
+      {
+        id: 'C6',
+        name: '雙面賭徒 (輪盤)',
+        category: '博弈高風險',
+        rarity: 'MYSTIC',
+        icon: 'fa-dice',
+        desc: '使用後當日結算立即擲骰：雙數當日點數 ×2 倍，單數點數減半 (×0.5)！',
+        color: '#e11d48'
+      }
+    ];
+
+    // App In-Memory State
+    let teams = JSON.parse(JSON.stringify(DEFAULT_TEAMS));
+    let scoreLogs = [];
+    let cardsInventory = []; // { id, cardId, teamId, dateDrawn, scheduledDate, status: 'held' | 'scheduled' | 'used', targetTeamId }
+
+    // Remote sync handlers
+    window.getGameStatePayload = function() {
+      return {
+        teams: JSON.stringify(teams),
+        scoreLogs: JSON.stringify(scoreLogs),
+        cardsInventory: JSON.stringify(cardsInventory),
+        updatedAt: new Date().toISOString()
+      };
+    };
+
+    window.applyRemoteData = function(remote) {
+      try {
+        if (remote.teams) teams = JSON.parse(remote.teams);
+        if (remote.scoreLogs) scoreLogs = JSON.parse(remote.scoreLogs);
+        if (remote.cardsInventory) cardsInventory = JSON.parse(remote.cardsInventory);
+        populateTeamSelects();
+        renderAll();
+      } catch (err) {
+        console.error("Apply remote state parse error:", err);
+      }
+    };
+
+    function triggerCloudSave() {
+      if (window.CloudSync && window.CloudSync.saveState) {
+        window.CloudSync.saveState(window.getGameStatePayload());
+      }
+    }
+
+    // Seed Initial Mock Activity for Demonstration & Visual Realism
+    function seedInitialDemoData() {
+      const today = new Date().toISOString().split('T')[0];
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+      scoreLogs = [
+        {
+          id: 'log-1',
+          date: yesterday,
+          teamId: 'T3',
+          m1: { invite: 1, attendOnline: 2, attendOffline: 0, demo: 1, deal: 1 }, // 1 + 2 + 2 + 5 = 10
+          m2: { invite: 1, attendOnline: 1, attendOffline: 1, demo: 1, deal: 0 }, // 1 + 1 + 2 + 2 = 6
+          comboTriggered: true,
+          baseTotal: 16,
+          finalScore: 19.2 // 16 * 1.2
+        },
+        {
+          id: 'log-2',
+          date: yesterday,
+          teamId: 'T1',
+          m1: { invite: 2, attendOnline: 1, attendOffline: 1, demo: 2, deal: 0 }, // 2 + 1 + 2 + 4 = 9
+          m2: { invite: 0, attendOnline: 0, attendOffline: 0, demo: 0, deal: 0 }, // 0
+          comboTriggered: false,
+          baseTotal: 9,
+          finalScore: 9.0
+        },
+        {
+          id: 'log-3',
+          date: today,
+          teamId: 'T7',
+          m1: { invite: 1, attendOnline: 0, attendOffline: 1, demo: 1, deal: 0 }, // 1 + 2 + 2 = 5
+          m2: { invite: 1, attendOnline: 1, attendOffline: 0, demo: 1, deal: 0 }, // 1 + 1 + 2 = 4
+          comboTriggered: true,
+          baseTotal: 9,
+          finalScore: 10.8 // 9 * 1.2
+        }
+      ];
+
+      cardsInventory = [
+        {
+          instanceId: 'card-inst-1',
+          cardId: 'C1',
+          teamId: 'T3',
+          dateDrawn: yesterday,
+          scheduledDate: today,
+          status: 'scheduled',
+          targetTeamId: null
+        },
+        {
+          instanceId: 'card-inst-2',
+          cardId: 'C5',
+          teamId: 'T1',
+          dateDrawn: yesterday,
+          scheduledDate: '',
+          status: 'held',
+          targetTeamId: null
+        }
+      ];
+    }
+
+    // ==========================================
+    // 2. LIFECYCLE & INITIALIZATION
+    // ==========================================
+    window.onload = function() {
+      seedInitialDemoData();
+      
+      // Set current date string
+      const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+      document.getElementById('currentDateDisplay').textContent = new Date().toLocaleDateString('zh-TW', options);
+      document.getElementById('scoreEntryDate').value = new Date().toISOString().split('T')[0];
+
+      // Render components
+      populateTeamSelects();
+      renderAll();
+    };
+
+    function renderAll() {
+      renderLeaderboard();
+      renderNauticalMap();
+      renderCardStash();
+      renderScoreLogs();
+      updateGachaEligibilityIndicator();
+    }
+
+    // ==========================================
+    // 3. CORE CALCULATIONS & STATS
+    // ==========================================
+    function calculateMemberPoints(data) {
+      let pts = 0;
+      pts += (Number(data.invite) || 0) * 1;
+      pts += (Number(data.attendOnline) || 0) * 1;
+      pts += (Number(data.attendOffline) || 0) * 2;
+      pts += (Number(data.demo) || 0) * 2;
+      pts += (Number(data.deal) || 0) * 5;
+      return pts;
+    }
+
+    function hasMemberContributed(data) {
+      return (Number(data.invite) || 0) > 0 ||
+             (Number(data.attendOnline) || 0) > 0 ||
+             (Number(data.attendOffline) || 0) > 0 ||
+             (Number(data.demo) || 0) > 0 ||
+             (Number(data.deal) || 0) > 0;
+    }
+
+    function getTeamStats(teamId) {
+      const logs = scoreLogs.filter(l => l.teamId === teamId);
+      let totalScore = 0;
+      let totalCombos = 0;
+      let memberAScore = 0;
+      let memberBScore = 0;
+
+      logs.forEach(l => {
+        totalScore += l.finalScore;
+        if (l.comboTriggered) totalCombos++;
+        memberAScore += calculateMemberPoints(l.m1);
+        memberBScore += calculateMemberPoints(l.m2);
+      });
+
+      return {
+        totalScore: Math.round(totalScore * 10) / 10,
+        totalCombos,
+        memberAScore,
+        memberBScore,
+        logsCount: logs.length
+      };
+    }
+
+    // ==========================================
+    // 4. MAP & TRACK VISUALIZATION
+    // ==========================================
+    function renderNauticalMap() {
+      const container = document.getElementById('nauticalMapTracks');
+      container.innerHTML = '';
+
+      // Sort teams by total points for map visualization
+      const teamsWithScore = teams.map(t => ({
+        ...t,
+        stats: getTeamStats(t.id)
+      })).sort((a, b) => b.stats.totalScore - a.stats.totalScore);
+
+      const targetGoal = 100; // 100 points to Reach the Gold Island
+
+      teamsWithScore.forEach((team, index) => {
+        const percentage = Math.min(100, Math.max(3, (team.stats.totalScore / targetGoal) * 100));
+        
+        const trackHtml = `
+          <div class="relative bg-slate-900/80 rounded-2xl p-3 border border-slate-800">
+            <div class="flex items-center justify-between text-xs mb-1.5">
+              <div class="flex items-center gap-2">
+                <span class="font-cinzel font-black px-2 py-0.5 rounded text-[10px]" style="background-color: ${team.color}33; color: ${team.color}">
+                  #${index + 1}
+                </span>
+                <span class="font-bold text-slate-200">${team.name}</span>
+                <span class="text-[11px] text-slate-400">(${team.memberA} & ${team.memberB})</span>
+              </div>
+              <div class="font-mono font-bold text-amber-300">
+                ${team.stats.totalScore.toFixed(1)} <span class="text-[10px] text-slate-400">/ 100 點</span>
+              </div>
+            </div>
+
+            <!-- Ocean Track Bar -->
+            <div class="w-full h-5 bg-ocean-950 rounded-full relative overflow-visible border border-slate-700/60 flex items-center">
+              
+              <!-- Checkpoint markers -->
+              <div class="absolute left-1/4 top-0 bottom-0 w-px bg-blue-500/30"></div>
+              <div class="absolute left-1/2 top-0 bottom-0 w-px bg-purple-500/30"></div>
+              <div class="absolute left-3/4 top-0 bottom-0 w-px bg-amber-500/30"></div>
+
+              <!-- Filled wake trail -->
+              <div class="h-full rounded-full transition-all duration-1000 opacity-60" 
+                   style="width: ${percentage}%; background: linear-gradient(90deg, transparent, ${team.color});">
+              </div>
+
+              <!-- Ship Icon Pin -->
+              <div class="absolute transform -translate-x-1/2 -top-2 transition-all duration-1000 z-10" 
+                   style="left: ${percentage}%;">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-lg border-2 border-amber-300 animate-float"
+                     style="background: ${team.color}; color: #07162c;">
+                  <i class="fa-solid ${team.icon}"></i>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', trackHtml);
+      });
+    }
+
+    // ==========================================
+    // 5. LEADERBOARD RENDERING
+    // ==========================================
+    function renderLeaderboard() {
+      const container = document.getElementById('leaderboardList');
+      container.innerHTML = '';
+
+      const enrichedTeams = teams.map(t => ({
+        ...t,
+        stats: getTeamStats(t.id)
+      })).sort((a, b) => b.stats.totalScore - a.stats.totalScore);
+
+      let totalPoints = 0;
+      enrichedTeams.forEach(t => totalPoints += t.stats.totalScore);
+      document.getElementById('totalPointsSum').textContent = `全體總探索點：${totalPoints.toFixed(1)} 點`;
+
+      if (enrichedTeams.length > 0) {
+        document.getElementById('leaderTeamText').textContent = `👑 ${enrichedTeams[0].name} (${enrichedTeams[0].stats.totalScore.toFixed(1)} 點)`;
+      }
+
+      enrichedTeams.forEach((team, rankIndex) => {
+        const isLeader = rankIndex === 0;
+        const rankBadge = isLeader 
+          ? '<span class="text-amber-400 text-lg"><i class="fa-solid fa-crown"></i> 1</span>'
+          : rankIndex === 1
+          ? '<span class="text-slate-300 font-bold text-sm">2</span>'
+          : rankIndex === 2
+          ? '<span class="text-amber-600 font-bold text-sm">3</span>'
+          : `<span class="text-slate-500 font-mono text-sm">${rankIndex + 1}</span>`;
+
+        // Check active cards held by team
+        const heldCards = cardsInventory.filter(c => c.teamId === team.id && c.status !== 'used');
+        const cardsBadgesHtml = heldCards.map(c => {
+          const cardDef = CARD_DATABASE.find(d => d.id === c.cardId);
+          return `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-slate-800 border border-amber-500/30 text-amber-300" title="${cardDef.desc}">
+            <i class="fa-solid ${cardDef.icon}"></i> ${cardDef.name}
+          </span>`;
+        }).join('');
+
+        const rowHtml = `
+          <div class="bg-ocean-950/70 hover:bg-ocean-950 border ${isLeader ? 'border-amber-500/70 shadow-lg shadow-amber-500/10' : 'border-slate-800'} rounded-2xl p-3.5 transition flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-8 text-center">${rankBadge}</div>
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg border border-white/20" style="background-color: ${team.color}25; color: ${team.color}">
+                <i class="fa-solid ${team.icon}"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h4 class="font-bold text-white text-sm sm:text-base">${team.name}</h4>
+                  ${team.stats.totalCombos > 0 ? `<span class="bg-amber-500/20 text-amber-300 text-[10px] px-2 py-0.2 rounded-full border border-amber-500/40">同心協力 × ${team.stats.totalCombos}</span>` : ''}
+                </div>
+                <div class="text-xs text-slate-400 mt-0.5 flex flex-wrap gap-2">
+                  <span>搭檔: <strong class="text-slate-200">${team.memberA}</strong> (${team.stats.memberAScore}點) + <strong class="text-slate-200">${team.memberB}</strong> (${team.stats.memberBScore}點)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Score and Cards Badges -->
+            <div class="flex items-center gap-4 ml-auto">
+              <div class="hidden sm:flex flex-wrap gap-1 max-w-xs justify-end">
+                ${cardsBadgesHtml || '<span class="text-[11px] text-slate-600">無手牌</span>'}
+              </div>
+              <div class="text-right min-w-[70px]">
+                <div class="text-lg sm:text-xl font-black font-mono text-amber-300">${team.stats.totalScore.toFixed(1)}</div>
+                <div class="text-[10px] text-slate-400 uppercase tracking-wider">探索點數</div>
+              </div>
+            </div>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', rowHtml);
+      });
+    }
+
+    // ==========================================
+    // 6. CARD STASH & INVENTORY RENDERING
+    // ==========================================
+    function renderCardStash() {
+      const container = document.getElementById('cardStashList');
+      container.innerHTML = '';
+
+      const activeCards = cardsInventory.filter(c => c.status !== 'used');
+      document.getElementById('activeCardsCount').textContent = `${activeCards.length} 張生效/持有中`;
+
+      if (activeCards.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-8 text-slate-500 text-xs">
+            <i class="fa-solid fa-box-open text-2xl mb-2 block"></i>
+            目前尚無隊伍持有卡牌。<br>單日積分達 5 點即可至抽卡中心抽取！
+          </div>
+        `;
+        return;
+      }
+
+      activeCards.forEach(c => {
+        const team = teams.find(t => t.id === c.teamId) || { name: '未知艦隊' };
+        const cardDef = CARD_DATABASE.find(d => d.id === c.cardId) || { name: '神祕卡', desc: '', icon: 'fa-question' };
+        
+        let statusBadge = '';
+        if (c.status === 'scheduled') {
+          statusBadge = `<span class="bg-blue-900/80 text-blue-200 border border-blue-600 px-2 py-0.5 rounded text-[10px]">預定: ${c.scheduledDate}</span>`;
+        } else {
+          statusBadge = `<span class="bg-amber-900/80 text-amber-200 border border-amber-600 px-2 py-0.5 rounded text-[10px]">在庫待用</span>`;
+        }
+
+        const itemHtml = `
+          <div class="bg-slate-900/90 border border-slate-700/60 rounded-xl p-3 flex items-start justify-between gap-2 text-xs">
+            <div class="flex items-start gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mt-0.5">
+                <i class="fa-solid ${cardDef.icon}"></i>
+              </div>
+              <div>
+                <div class="font-bold text-amber-300 flex items-center gap-1.5">
+                  ${cardDef.name}
+                  ${statusBadge}
+                </div>
+                <div class="text-[11px] text-slate-400 mt-0.5">
+                  持有者: <strong class="text-slate-200">${team.name}</strong>
+                </div>
+                <div class="text-[11px] text-slate-400 leading-snug mt-1">
+                  ${cardDef.desc}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', itemHtml);
+      });
+    }
+
+    // ==========================================
+    // 7. SCORE LOGS TABLE RENDERING
+    // ==========================================
+    function renderScoreLogs() {
+      const tbody = document.getElementById('logsTableBody');
+      const search = document.getElementById('logSearchInput').value.toLowerCase();
+      tbody.innerHTML = '';
+
+      const filteredLogs = [...scoreLogs].reverse().filter(log => {
+        const team = teams.find(t => t.id === log.teamId);
+        const teamName = team ? team.name.toLowerCase() : '';
+        return teamName.includes(search) || log.date.includes(search);
+      });
+
+      if (filteredLogs.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="text-center py-8 text-slate-500 text-xs">尚無任何航海分數紀錄</td>
+          </tr>
+        `;
+        return;
+      }
+
+      filteredLogs.forEach(log => {
+        const team = teams.find(t => t.id === log.teamId) || { name: '未知戰隊' };
+        const eligibleForGacha = log.finalScore >= 5.0;
+
+        const row = `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="py-3 px-4 font-mono">${log.date}</td>
+            <td class="py-3 px-4 font-bold text-slate-200">${team.name}</td>
+            <td class="py-3 px-4 text-[11px]">
+              <span class="text-amber-200">${team.memberA}</span>: 
+              邀約${log.m1.invite} / 實出${log.m1.attendOffline} / 線出${log.m1.attendOnline} / Demo${log.m1.demo} / 成交${log.m1.deal}
+            </td>
+            <td class="py-3 px-4 text-[11px]">
+              <span class="text-amber-200">${team.memberB}</span>: 
+              邀約${log.m2.invite} / 實出${log.m2.attendOffline} / 線出${log.m2.attendOnline} / Demo${log.m2.demo} / 成交${log.m2.deal}
+            </td>
+            <td class="py-3 px-4 text-center">
+              ${log.comboTriggered 
+                ? '<span class="bg-emerald-950 text-emerald-300 border border-emerald-600 px-2 py-0.5 rounded-full text-[10px] font-bold">× 1.2 倍觸發</span>' 
+                : '<span class="text-slate-500 text-[10px]">無加成</span>'}
+            </td>
+            <td class="py-3 px-4 text-right font-mono font-bold text-amber-300 text-sm">
+              ${log.finalScore.toFixed(1)} 點
+            </td>
+            <td class="py-3 px-4 text-center">
+              ${eligibleForGacha 
+                ? '<span class="text-rose-400 font-bold flex items-center justify-center gap-1 text-[11px]"><i class="fa-solid fa-gift"></i> 可抽卡</span>' 
+                : '<span class="text-slate-500 text-[10px]">未達5點</span>'}
+            </td>
+            <td class="py-3 px-4 text-center">
+              <button onclick="deleteLogEntry('${log.id}')" class="text-slate-500 hover:text-rose-400 p-1 transition" title="刪除本筆紀錄">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+        tbody.insertAdjacentHTML('beforeend', row);
+      });
+    }
+
+    // ==========================================
+    // 8. SCORE ENTRY FORM LOGIC & PREVIEW
+    // ==========================================
+    function openScoreModal() {
+      populateTeamSelects();
+      updateMemberLabelsForScoreModal();
+      calculatePreviewScore();
+      document.getElementById('scoreModal').classList.remove('hidden');
+    }
+
+    function closeScoreModal() {
+      document.getElementById('scoreModal').classList.add('hidden');
+    }
+
+    function populateTeamSelects() {
+      const selectEntry = document.getElementById('scoreEntryTeamId');
+      const selectGacha = document.getElementById('gachaTeamSelect');
+
+      selectEntry.innerHTML = '';
+      selectGacha.innerHTML = '';
+
+      teams.forEach(t => {
+        const opt1 = new Option(`${t.name} (${t.memberA} & ${t.memberB})`, t.id);
+        const opt2 = new Option(`${t.name} (${t.memberA} & ${t.memberB})`, t.id);
+        selectEntry.add(opt1);
+        selectGacha.add(opt2);
+      });
+    }
+
+    function updateMemberLabelsForScoreModal() {
+      const teamId = document.getElementById('scoreEntryTeamId').value;
+      const team = teams.find(t => t.id === teamId) || teams[0];
+      if (team) {
+        document.getElementById('memberANameLabel').textContent = team.memberA;
+        document.getElementById('memberBNameLabel').textContent = team.memberB;
+      }
+      calculatePreviewScore();
+    }
+
+    function calculatePreviewScore() {
+      const m1Data = {
+        invite: document.getElementById('m1_invite').value,
+        attendOnline: document.getElementById('m1_attendOnline').value,
+        attendOffline: document.getElementById('m1_attendOffline').value,
+        demo: document.getElementById('m1_demo').value,
+        deal: document.getElementById('m1_deal').value,
+      };
+
+      const m2Data = {
+        invite: document.getElementById('m2_invite').value,
+        attendOnline: document.getElementById('m2_attendOnline').value,
+        attendOffline: document.getElementById('m2_attendOffline').value,
+        demo: document.getElementById('m2_demo').value,
+        deal: document.getElementById('m2_deal').value,
+      };
+
+      const ptsA = calculateMemberPoints(m1Data);
+      const ptsB = calculateMemberPoints(m2Data);
+
+      document.getElementById('subtotalA').textContent = `${ptsA} 點`;
+      document.getElementById('subtotalB').textContent = `${ptsB} 點`;
+
+      const m1Active = hasMemberContributed(m1Data);
+      const m2Active = hasMemberContributed(m2Data);
+      const isCombo = m1Active && m2Active;
+
+      const comboBadge = document.getElementById('comboBadge');
+      const comboDesc = document.getElementById('comboDescription');
+
+      if (isCombo) {
+        comboBadge.className = 'text-xs px-2 py-0.5 rounded-full font-bold bg-emerald-500 text-slate-950 animate-pulse';
+        comboBadge.textContent = '⚡ 觸發同心協力！總分 × 1.2 倍';
+        comboDesc.textContent = '太棒了！兩位組員今日均有戰功產出，啟動合作爆發！';
+      } else {
+        comboBadge.className = 'text-xs px-2 py-0.5 rounded-full font-bold bg-slate-800 text-slate-400';
+        comboBadge.textContent = '未達成同心協力 (標準計分)';
+        comboDesc.textContent = '需兩位隊友均有至少 1 項指標以啟動 1.2 倍加成';
+      }
+
+      const rawTotal = ptsA + ptsB;
+      const finalTotal = isCombo ? (rawTotal * 1.2) : rawTotal;
+
+      document.getElementById('previewFinalPoints').innerHTML = `${finalTotal.toFixed(1)} <span class="text-xs font-normal">點</span>`;
+    }
+
+    function handleScoreSubmit(e) {
+      e.preventDefault();
+
+      const date = document.getElementById('scoreEntryDate').value;
+      const teamId = document.getElementById('scoreEntryTeamId').value;
+
+      const m1Data = {
+        invite: Number(document.getElementById('m1_invite').value) || 0,
+        attendOnline: Number(document.getElementById('m1_attendOnline').value) || 0,
+        attendOffline: Number(document.getElementById('m1_attendOffline').value) || 0,
+        demo: Number(document.getElementById('m1_demo').value) || 0,
+        deal: Number(document.getElementById('m1_deal').value) || 0,
+      };
+
+      const m2Data = {
+        invite: Number(document.getElementById('m2_invite').value) || 0,
+        attendOnline: Number(document.getElementById('m2_attendOnline').value) || 0,
+        attendOffline: Number(document.getElementById('m2_attendOffline').value) || 0,
+        demo: Number(document.getElementById('m2_demo').value) || 0,
+        deal: Number(document.getElementById('m2_deal').value) || 0,
+      };
+
+      const ptsA = calculateMemberPoints(m1Data);
+      const ptsB = calculateMemberPoints(m2Data);
+      const isCombo = hasMemberContributed(m1Data) && hasMemberContributed(m2Data);
+      const baseTotal = ptsA + ptsB;
+      const finalScore = isCombo ? Math.round(baseTotal * 1.2 * 10) / 10 : baseTotal;
+
+      // Add to logs
+      const newLog = {
+        id: 'log-' + Date.now(),
+        date,
+        teamId,
+        m1: m1Data,
+        m2: m2Data,
+        comboTriggered: isCombo,
+        baseTotal,
+        finalScore
+      };
+
+      scoreLogs.push(newLog);
+
+      // Trigger Confetti if great score
+      if (finalScore >= 5.0) {
+        confetti({
+          particleCount: 80,
+          spread: 60,
+          origin: { y: 0.6 }
+        });
+        showToast('🎉 得分達標！獲得 1 次航海事件卡抽取資格！', 'success');
+      } else {
+        showToast('戰果登記成功！', 'info');
+      }
+
+      // Reset Form fields
+      document.getElementById('dailyScoreForm').reset();
+      document.getElementById('scoreEntryDate').value = date;
+      closeScoreModal();
+      renderAll();
+      triggerCloudSave();
+    }
+
+    function deleteLogEntry(logId) {
+      scoreLogs = scoreLogs.filter(l => l.id !== logId);
+      renderAll();
+      triggerCloudSave();
+      showToast('已刪除該筆得分紀錄', 'info');
+    }
+
+    // ==========================================
+    // 9. GACHA & CARD DRAW ENGINE
+    // ==========================================
+    let currentDrawnCard = null;
+    let isCardFlipped = false;
+
+    function openGachaModal() {
+      populateTeamSelects();
+      resetCardView();
+      document.getElementById('gachaModal').classList.remove('hidden');
+    }
+
+    function closeGachaModal() {
+      document.getElementById('gachaModal').classList.add('hidden');
+    }
+
+    function resetCardView() {
+      currentDrawnCard = null;
+      isCardFlipped = false;
+      const card = document.getElementById('gachaCard');
+      card.classList.remove('rotate-y-180');
+      document.getElementById('drawCardBtn').classList.remove('hidden');
+      document.getElementById('resetCardBtn').classList.add('hidden');
+    }
+
+    function triggerCardFlip() {
+      if (!currentDrawnCard) {
+        executeDrawCard();
+        return;
+      }
+      const card = document.getElementById('gachaCard');
+      isCardFlipped = !isCardFlipped;
+      if (isCardFlipped) {
+        card.classList.add('rotate-y-180');
+      } else {
+        card.classList.remove('rotate-y-180');
+      }
+    }
+
+    function executeDrawCard() {
+      const teamId = document.getElementById('gachaTeamSelect').value;
+      const team = teams.find(t => t.id === teamId);
+
+      // Randomly select card from CARD_DATABASE
+      const randomIndex = Math.floor(Math.random() * CARD_DATABASE.length);
+      currentDrawnCard = CARD_DATABASE[randomIndex];
+
+      // Populate Card Front
+      document.getElementById('gachaCardName').textContent = currentDrawnCard.name;
+      document.getElementById('gachaCardDesc').textContent = currentDrawnCard.desc;
+      document.getElementById('gachaCategory').textContent = currentDrawnCard.category;
+      document.getElementById('gachaRarity').textContent = currentDrawnCard.rarity;
+      
+      const icon = document.getElementById('gachaIcon');
+      icon.className = `fa-solid ${currentDrawnCard.icon}`;
+
+      // Flip the card animation
+      const card = document.getElementById('gachaCard');
+      card.classList.add('rotate-y-180');
+      isCardFlipped = true;
+
+      // Add to inventory
+      const newInventoryItem = {
+        instanceId: 'inst-' + Date.now(),
+        cardId: currentDrawnCard.id,
+        teamId: team.id,
+        dateDrawn: new Date().toISOString().split('T')[0],
+        scheduledDate: '',
+        status: 'held',
+        targetTeamId: null
+      };
+
+      cardsInventory.push(newInventoryItem);
+
+      // Celebrate
+      confetti({
+        particleCount: 120,
+        spread: 90,
+        origin: { y: 0.5 }
+      });
+
+      document.getElementById('drawCardBtn').classList.add('hidden');
+      document.getElementById('resetCardBtn').classList.remove('hidden');
+
+      renderAll();
+      triggerCloudSave();
+      showToast(`🏴‍☠️ ${team.name} 抽中了【${currentDrawnCard.name}】！`, 'success');
+    }
+
+    function updateGachaEligibilityIndicator() {
+      const today = new Date().toISOString().split('T')[0];
+      const todayEligible = scoreLogs.some(l => l.date === today && l.finalScore >= 5.0);
+      const badge = document.getElementById('gachaEligibleBadge');
+      if (todayEligible) {
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
+    // ==========================================
+    // 10. CARD MANAGEMENT & DATE SCHEDULING
+    // ==========================================
+    function openCardManagementModal() {
+      renderCardManageTable();
+      document.getElementById('cardManageModal').classList.remove('hidden');
+    }
+
+    function closeCardManagementModal() {
+      document.getElementById('cardManageModal').classList.add('hidden');
+      renderAll();
+    }
+
+    function renderCardManageTable() {
+      const tbody = document.getElementById('cardManageTableBody');
+      tbody.innerHTML = '';
+
+      if (cardsInventory.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500">目前尚無卡牌紀錄</td></tr>`;
+        return;
+      }
+
+      cardsInventory.forEach(item => {
+        const team = teams.find(t => t.id === item.teamId) || { name: '未知' };
+        const cardDef = CARD_DATABASE.find(c => c.id === item.cardId) || { name: '未知卡牌' };
+
+        const row = `
+          <tr class="hover:bg-slate-800/40">
+            <td class="py-2.5 px-3 font-mono text-[11px]">${item.dateDrawn}</td>
+            <td class="py-2.5 px-3 font-bold text-amber-200">${team.name}</td>
+            <td class="py-2.5 px-3 font-bold text-white">${cardDef.name}</td>
+            <td class="py-2.5 px-3">
+              <input type="date" value="${item.scheduledDate || ''}" onchange="updateCardScheduleDate('${item.instanceId}', this.value)" class="bg-slate-900 border border-slate-700 text-xs px-2 py-1 rounded text-white focus:outline-none">
+            </td>
+            <td class="py-2.5 px-3 text-center">
+              <select onchange="updateCardStatus('${item.instanceId}', this.value)" class="bg-slate-900 border border-slate-700 text-xs px-2 py-1 rounded text-white focus:outline-none">
+                <option value="held" ${item.status === 'held' ? 'selected' : ''}>在庫待用</option>
+                <option value="scheduled" ${item.status === 'scheduled' ? 'selected' : ''}>已排程生效</option>
+                <option value="used" ${item.status === 'used' ? 'selected' : ''}>已使用結算</option>
+              </select>
+            </td>
+            <td class="py-2.5 px-3 text-center">
+              <button onclick="removeCardInstance('${item.instanceId}')" class="text-slate-500 hover:text-rose-400 p-1">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+        tbody.insertAdjacentHTML('beforeend', row);
+      });
+    }
+
+    function updateCardScheduleDate(instanceId, date) {
+      const item = cardsInventory.find(c => c.instanceId === instanceId);
+      if (item) {
+        item.scheduledDate = date;
+        if (date && item.status === 'held') {
+          item.status = 'scheduled';
+        }
+        showToast('已更新卡牌生效日期', 'info');
+        renderCardStash();
+        triggerCloudSave();
+      }
+    }
+
+    function updateCardStatus(instanceId, status) {
+      const item = cardsInventory.find(c => c.instanceId === instanceId);
+      if (item) {
+        item.status = status;
+        showToast('已更新卡片使用狀態', 'info');
+        renderCardStash();
+        triggerCloudSave();
+      }
+    }
+
+    function removeCardInstance(instanceId) {
+      cardsInventory = cardsInventory.filter(c => c.instanceId !== instanceId);
+      renderCardManageTable();
+      renderCardStash();
+      triggerCloudSave();
+      showToast('已註銷該卡片', 'info');
+    }
+
+    function manuallyAddCardPrompt() {
+      const team = teams[0];
+      const card = CARD_DATABASE[0];
+      const newInst = {
+        instanceId: 'inst-' + Date.now(),
+        cardId: card.id,
+        teamId: team.id,
+        dateDrawn: new Date().toISOString().split('T')[0],
+        scheduledDate: '',
+        status: 'held',
+        targetTeamId: null
+      };
+      cardsInventory.push(newInst);
+      renderCardManageTable();
+      renderCardStash();
+      triggerCloudSave();
+      showToast('已手動分派一張卡片', 'success');
+    }
+
+    // ==========================================
+    // 11. TEAM SETUP & CONFIGURATION MODAL
+    // ==========================================
+    function openConfigModal() {
+      const container = document.getElementById('teamConfigList');
+      container.innerHTML = '';
+
+      teams.forEach((t, i) => {
+        const itemHtml = `
+          <div class="bg-ocean-950 p-4 rounded-xl border border-slate-700/80 space-y-3">
+            <div class="flex items-center justify-between text-xs font-bold text-amber-300">
+              <span>戰隊 #${i + 1} (${t.id})</span>
+              <span class="text-slate-400">雙人配置</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">戰船/隊伍名稱</label>
+                <input type="text" id="cfg_name_${t.id}" value="${t.name}" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">隊員 A 姓名</label>
+                <input type="text" id="cfg_m1_${t.id}" value="${t.memberA}" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1">隊員 B 姓名</label>
+                <input type="text" id="cfg_m2_${t.id}" value="${t.memberB}" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white">
+              </div>
+            </div>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', itemHtml);
+      });
+
+      document.getElementById('configModal').classList.remove('hidden');
+    }
+
+    function closeConfigModal() {
+      document.getElementById('configModal').classList.add('hidden');
+    }
+
+    function saveTeamConfigs() {
+      teams.forEach(t => {
+        const nameInput = document.getElementById(`cfg_name_${t.id}`);
+        const m1Input = document.getElementById(`cfg_m1_${t.id}`);
+        const m2Input = document.getElementById(`cfg_m2_${t.id}`);
+
+        if (nameInput && m1Input && m2Input) {
+          t.name = nameInput.value.trim() || t.name;
+          t.memberA = m1Input.value.trim() || t.memberA;
+          t.memberB = m2Input.value.trim() || t.memberB;
+        }
+      });
+
+      populateTeamSelects();
+      renderAll();
+      closeConfigModal();
+      triggerCloudSave();
+      showToast('戰隊名冊與編制設定已儲存！', 'success');
+    }
+
+    function resetDefaultTeams() {
+      teams = JSON.parse(JSON.stringify(DEFAULT_TEAMS));
+      openConfigModal();
+      triggerCloudSave();
+      showToast('已重設為預設隊伍', 'info');
+    }
+
+    // ==========================================
+    // 12. RULES MODAL & UTILS
+    // ==========================================
+    function showRulesModal() {
+      document.getElementById('rulesModal').classList.remove('hidden');
+    }
+
+    function closeRulesModal() {
+      document.getElementById('rulesModal').classList.add('hidden');
+    }
+
+    // Deploy Modal logic
+    function openDeployModal() {
+      document.getElementById('deployModal').classList.remove('hidden');
+    }
+
+    function closeDeployModal() {
+      document.getElementById('deployModal').classList.add('hidden');
+    }
+
+    function copyFullHtmlCode() {
+      try {
+        const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+        const tempTextarea = document.createElement('textarea');
+        tempTextarea.value = fullHtml;
+        tempTextarea.style.position = 'fixed';
+        tempTextarea.style.left = '-9999px';
+        document.body.appendChild(tempTextarea);
+        tempTextarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempTextarea);
+        showToast('✅ 完整 HTML 程式碼已複製！可直接貼至 Google 協作平台的「嵌入程式碼」', 'success');
+      } catch (err) {
+        showToast('複製失敗，請直接從右側編輯器選取複製', 'error');
+      }
+    }
+
+    function downloadHtmlFile() {
+      const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.href = URL.createObjectURL(blob);
+      downloadAnchor.download = 'pirate_sales_adventure.html';
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showToast('📥 index.html 檔案已開始下載！', 'success');
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      
+      const colors = {
+        success: 'bg-emerald-950/95 border-emerald-500 text-emerald-200',
+        info: 'bg-ocean-950/95 border-amber-500 text-amber-200',
+        error: 'bg-rose-950/95 border-rose-500 text-rose-200'
+      };
+
+      toast.className = `pointer-events-auto border px-4 py-3 rounded-xl shadow-2xl text-xs flex items-center gap-2 transform transition-all duration-300 translate-y-3 opacity-0 ${colors[type] || colors.info}`;
+      toast.innerHTML = `<i class="fa-solid fa-circle-info"></i> <span>${message}</span>`;
+      
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.classList.remove('translate-y-3', 'opacity-0');
+      }, 10);
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    function exportDataBackup() {
+      const dataPayload = {
+        exportDate: new Date().toISOString(),
+        teams,
+        scoreLogs,
+        cardsInventory
+      };
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataPayload, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `pirate_sales_quest_${new Date().toISOString().split('T')[0]}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showToast('競賽數據備份 JSON 匯出完成！', 'success');
+    }
+  </script>
+
+</body></html>
