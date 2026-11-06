@@ -196,12 +196,111 @@
     .rotate-y-180 {
       transform: rotateY(180deg);
     }
+
+    /* ===== 航道海面動畫 ===== */
+    .nautical-lane {
+      background: linear-gradient(180deg, rgba(8, 47, 73, 0.85) 0%, rgba(12, 74, 110, 0.75) 55%, rgba(7, 89, 133, 0.9) 100%);
+    }
+    .ocean-waves {
+      top: auto !important; height: 26px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='26' viewBox='0 0 80 26'%3E%3Cpath d='M0 10 Q10 2 20 10 T40 10 T60 10 T80 10 V26 H0 Z' fill='%2338bdf8' fill-opacity='0.22'/%3E%3Cpath d='M0 10 Q10 2 20 10 T40 10 T60 10 T80 10' fill='none' stroke='%23e0f2fe' stroke-opacity='0.35' stroke-width='1.5'/%3E%3C/svg%3E");
+      background-repeat: repeat-x; background-size: 80px 26px;
+      animation: waveDrift 6s linear infinite;
+    }
+    .ocean-waves-2 {
+      height: 18px; opacity: 0.6; background-size: 120px 18px;
+      animation: waveDrift 9s linear infinite reverse;
+    }
+    @keyframes waveDrift { from { background-position-x: 0; } to { background-position-x: 240px; } }
+
+    .lane-mark { position: absolute; top: 4px; bottom: 6px; transform: translateX(-50%); border-left: 1px dashed rgba(186, 230, 253, 0.25); }
+    .lane-mark span { position: absolute; top: 0; left: 4px; font-size: 13px; opacity: 0.75; }
+    .lane-mark em { position: absolute; top: 2px; left: 22px; font-style: normal; font-size: 9px; color: rgba(186, 230, 253, 0.55); font-family: ui-monospace, monospace; }
+
+    .ship-anchor { transform: translateX(-50%); transition: left 1.8s cubic-bezier(.25,.8,.3,1); }
+    .ship-wake { transition: width 1.8s cubic-bezier(.25,.8,.3,1); }
+    .ship-bob { animation: shipBob 3.2s ease-in-out infinite; transform-origin: 50% 85%; }
+    @keyframes shipBob {
+      0%, 100% { transform: translateY(0) rotate(-4deg); }
+      50% { transform: translateY(-4px) rotate(4deg); }
+    }
+    .ship-splash {
+      position: absolute; left: 10%; right: 10%; bottom: 2px; height: 5px; border-radius: 50%;
+      background: radial-gradient(ellipse at center, rgba(255,255,255,0.55), transparent 70%);
+      animation: splash 3.2s ease-in-out infinite;
+    }
+    @keyframes splash { 0%,100% { opacity: .35; transform: scaleX(.8); } 50% { opacity: .8; transform: scaleX(1.1); } }
+    .gold-island-glow { filter: drop-shadow(0 0 10px #fbbf24); animation: pulseGold 2s infinite; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ocean-waves, .ship-bob, .ship-splash { animation: none; }
+      .ship-anchor, .ship-wake { transition: none; }
+    }
+
+    /* ===== 排行榜 ===== */
+    .lb-row {
+      background: linear-gradient(100deg, color-mix(in srgb, var(--team) 14%, #061426) 0%, rgba(6, 20, 38, 0.85) 45%);
+      border-color: rgba(51, 65, 85, 0.7);
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+      animation: lbIn .5s ease-out both;
+    }
+    .lb-row:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--team) 60%, transparent); box-shadow: 0 8px 24px -8px color-mix(in srgb, var(--team) 50%, transparent); }
+    .lb-gold   { border-color: rgba(251, 191, 36, .7); box-shadow: 0 0 0 1px rgba(251,191,36,.15), 0 10px 30px -10px rgba(251,191,36,.45); }
+    .lb-silver { border-color: rgba(203, 213, 225, .45); }
+    .lb-bronze { border-color: rgba(217, 119, 6, .45); }
+    .lb-score { color: #fcd34d; text-shadow: 0 0 12px rgba(252, 211, 77, .35); }
+    .lb-gold .lb-score { background: linear-gradient(180deg,#fef3c7,#f59e0b); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    @keyframes lbIn { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: none; } }
+
+    .lb-shine { position: absolute; inset: 0; pointer-events: none;
+      background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.08) 45%, transparent 60%);
+      background-size: 250% 100%; animation: lbShine 4s ease-in-out infinite; }
+    @keyframes lbShine { from { background-position: 150% 0; } to { background-position: -100% 0; } }
+
+    .lb-medal { position: relative; width: 28px; height: 28px; border-radius: 9999px; display: flex; align-items: center; justify-content: center;
+      font-family: 'Cinzel', serif; font-weight: 900; font-size: 13px; flex-shrink: 0; }
+    @media (min-width: 640px) { .lb-medal { width: 34px; height: 34px; font-size: 15px; } }
+    .medal-gold   { background: radial-gradient(circle at 35% 30%, #fff7d6, #fbbf24 45%, #b45309); color: #451a03; box-shadow: 0 0 14px rgba(251,191,36,.6); }
+    .medal-silver { background: radial-gradient(circle at 35% 30%, #ffffff, #cbd5e1 45%, #64748b); color: #1e293b; }
+    .medal-bronze { background: radial-gradient(circle at 35% 30%, #ffe4c4, #d97706 45%, #7c2d12); color: #2a1205; }
+    .medal-plain  { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
+
+    .lb-avatar { background: linear-gradient(180deg, color-mix(in srgb, var(--team) 25%, #0c4a6e) 0%, #075985 100%); }
+    .lb-chip { display: inline-flex; align-items: center; gap: 2px; font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 9999px; border-width: 1px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .lb-row, .lb-shine { animation: none; }
+    }
+
+    /* 管理員專用：非管理員完全隱藏 */
+    body:not(.is-admin) .admin-only { display: none !important; }
+
+    /* 跑馬燈 */
+    .marquee-viewport { overflow: hidden; white-space: nowrap; position: relative; }
+    .marquee-track { display: inline-block; padding-left: 100%; animation: marqueeScroll var(--marquee-duration, 20s) linear infinite; }
+    .marquee-viewport:hover .marquee-track { animation-play-state: paused; }
+    @keyframes marqueeScroll { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+    @media (prefers-reduced-motion: reduce) {
+      .marquee-track { animation: none; padding-left: 0; white-space: normal; }
+    }
   </style>
 </head>
 <body class="selection:bg-amber-500 selection:text-black">
 
   <!-- TOP NAVIGATION HEADER -->
   <header class="sticky top-0 z-40 bg-ocean-900/90 backdrop-blur-md border-b border-amber-600/30 shadow-xl">
+    <!-- 跑馬燈公告 -->
+    <div id="marqueeBar" class="hidden bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 text-slate-950 text-xs sm:text-sm font-bold border-b border-amber-300/60">
+      <div class="max-w-7xl mx-auto flex items-center gap-2 px-3 sm:px-6 py-1.5">
+        <i class="fa-solid fa-bullhorn shrink-0"></i>
+        <div class="marquee-viewport flex-1">
+          <div id="marqueeTrack" class="marquee-track"></div>
+        </div>
+        <button onclick="openMarqueeModal()" class="admin-only shrink-0 px-2 py-0.5 rounded-md bg-slate-950/20 hover:bg-slate-950/30 text-[11px]" title="編輯跑馬燈">
+          <i class="fa-solid fa-pen"></i>
+        </button>
+      </div>
+    </div>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
       <!-- Title & Branding -->
       <div class="flex items-center space-x-3">
@@ -223,26 +322,37 @@
       </div>
 
       <!-- Quick Action Buttons -->
-      <div class="flex items-center gap-2">
-        <button onclick="openScoreModal()" class="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold px-3 sm:px-4 py-2 rounded-xl shadow-lg shadow-amber-600/30 transition-all transform active:scale-95 text-xs sm:text-sm">
+      <div class="flex flex-wrap items-center gap-2">
+        <button onclick="openPenaltyModal()" class="admin-only flex items-center gap-2 bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-500 hover:to-blue-600 text-white font-bold px-3 sm:px-4 py-2 rounded-xl shadow-lg shadow-cyan-700/30 transition-all transform active:scale-95 text-xs sm:text-sm">
+          <i class="fa-solid fa-water"></i>
+          <span>海嘯扣分</span>
+        </button>
+        <button onclick="openMarqueeModal()" class="admin-only flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 font-bold px-3 py-2 rounded-xl transition text-xs sm:text-sm" title="編輯跑馬燈公告">
+          <i class="fa-solid fa-bullhorn"></i>
+          <span>公告</span>
+        </button>
+        <button onclick="openScoreModal()" class="admin-only flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold px-3 sm:px-4 py-2 rounded-xl shadow-lg shadow-amber-600/30 transition-all transform active:scale-95 text-xs sm:text-sm">
           <i class="fa-solid fa-feather-pointed"></i>
           <span>每日得分輸入</span>
         </button>
-        <button onclick="openGachaModal()" class="flex items-center gap-2 bg-gradient-to-r from-rose-600 to-red-700 hover:from-rose-500 hover:to-red-600 text-white font-bold px-3 sm:px-4 py-2 rounded-xl shadow-lg shadow-red-700/30 transition-all transform active:scale-95 text-xs sm:text-sm">
+        <button onclick="openGachaModal()" class="admin-only flex items-center gap-2 bg-gradient-to-r from-rose-600 to-red-700 hover:from-rose-500 hover:to-red-600 text-white font-bold px-3 sm:px-4 py-2 rounded-xl shadow-lg shadow-red-700/30 transition-all transform active:scale-95 text-xs sm:text-sm">
           <i class="fa-solid fa-dice-d20"></i>
           <span class="hidden xs:inline">事件</span><span>抽卡中心</span>
           <span id="gachaEligibleBadge" class="hidden bg-amber-400 text-slate-900 text-xs px-1.5 py-0.2 rounded-full font-black">!</span>
         </button>
-        <button onclick="openGoogleSheetModal()" class="flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-500 hover:to-green-600 text-white font-bold px-3 py-2 rounded-xl shadow-lg shadow-green-700/30 transition-all transform active:scale-95 text-xs sm:text-sm" title="連接 Google 官方試算表永久存檔">
+        <button onclick="openGoogleSheetModal()" class="admin-only flex items-center gap-1.5 bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-500 hover:to-green-600 text-white font-bold px-3 py-2 rounded-xl shadow-lg shadow-green-700/30 transition-all transform active:scale-95 text-xs sm:text-sm" title="連接 Google 官方試算表永久存檔">
           <i class="fa-solid fa-table text-white"></i>
           <span>試算表直連</span>
         </button>
-        <button onclick="openDeployModal()" class="flex items-center gap-1.5 bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-500 hover:to-blue-600 text-white font-bold px-3 py-2 rounded-xl shadow-lg shadow-blue-700/30 transition-all transform active:scale-95 text-xs sm:text-sm" title="一鍵部署到協作平台或發布網址">
+        <button onclick="openDeployModal()" class="admin-only flex items-center gap-1.5 bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-500 hover:to-blue-600 text-white font-bold px-3 py-2 rounded-xl shadow-lg shadow-blue-700/30 transition-all transform active:scale-95 text-xs sm:text-sm" title="一鍵部署到協作平台或發布網址">
           <i class="fa-solid fa-cloud-arrow-up"></i>
           <span>部署上線</span>
         </button>
-        <button onclick="openConfigModal()" class="p-2 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 rounded-xl transition" title="組別與競賽設定">
+        <button onclick="openConfigModal()" class="admin-only p-2 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 rounded-xl transition" title="組別與競賽設定">
           <i class="fa-solid fa-sliders text-base"></i>
+        </button>
+        <button id="adminToggleBtn" onclick="toggleAdminLogin()" class="p-2 bg-slate-800/70 hover:bg-slate-700 text-slate-400 border border-slate-700 rounded-xl transition" title="管理員登入">
+          <i class="fa-solid fa-lock text-base"></i>
         </button>
       </div>
     </div>
@@ -289,11 +399,12 @@
           </h2>
           <p class="text-xs text-slate-400">航程終點為「傳奇黃金島（100點）」，即時隨各隊積分向前巡弋</p>
         </div>
-        <div class="flex items-center gap-2 text-xs">
-          <span class="flex items-center gap-1 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span> 啟航港 (0)</span>
-          <span class="flex items-center gap-1 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> 珊瑚礁 (25)</span>
-          <span class="flex items-center gap-1 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> 暴風眼 (50)</span>
-          <span class="flex items-center gap-1 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> 黃金島 (100)</span>
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-300">
+          <span>⚓ 啟航港 0</span>
+          <span>🪸 珊瑚礁 25</span>
+          <span>🌀 暴風眼 50</span>
+          <span>🦈 鯊魚海域 75</span>
+          <span>🏝️ 黃金島 100</span>
         </div>
       </div>
 
@@ -355,7 +466,7 @@
         </div>
 
         <div class="mt-4 pt-3 border-t border-slate-700/50">
-          <button onclick="openCardManagementModal()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-amber-500/30 text-amber-300 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition">
+          <button onclick="openCardManagementModal()" class="admin-only w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-amber-500/30 text-amber-300 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition">
             <i class="fa-solid fa-clock-rotate-left"></i>
             管理卡牌標記與生效日期
           </button>
@@ -397,6 +508,82 @@
           <tbody id="logsTableBody" class="divide-y divide-slate-800">
             <!-- Rendered by JS -->
           </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SECTION 3.5: DAILY PER-PERSON SCORE BOARD -->
+    <section class="parchment-card rounded-3xl p-5 sm:p-6 shadow-2xl">
+      <div class="flex flex-wrap items-center justify-between mb-4 gap-3">
+        <div>
+          <h2 class="text-lg font-bold text-amber-300 flex items-center gap-2">
+            <i class="fa-solid fa-calendar-day text-amber-400"></i>
+            每日個人戰績查詢
+          </h2>
+          <p class="text-xs text-slate-400">選擇日期查看當天每位隊員的得分，沒有產出的隊員也會列出 0 分</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="shiftDailyDate(-1)" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs text-slate-200" title="前一天"><i class="fa-solid fa-chevron-left"></i></button>
+          <input type="date" id="dailyViewDate" onchange="renderDailyBoard()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-400">
+          <button onclick="shiftDailyDate(1)" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg text-xs text-slate-200" title="後一天"><i class="fa-solid fa-chevron-right"></i></button>
+          <button onclick="setDailyDateToday()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-amber-500/30 rounded-lg text-xs text-amber-300 font-bold">今天</button>
+          <button onclick="exportDailyCsv()" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 rounded-lg text-xs text-white font-bold flex items-center gap-1" title="匯出每天每人的完整明細">
+            <i class="fa-solid fa-file-csv"></i> 匯出全部每日明細
+          </button>
+        </div>
+      </div>
+
+      <div id="dailyBoardSummary" class="flex flex-wrap gap-2 mb-3 text-[11px]"></div>
+
+      <div class="overflow-x-auto rounded-xl border border-slate-700/50">
+        <table class="w-full text-left text-xs text-slate-300">
+          <thead class="bg-ocean-950 text-amber-300 font-bold text-[11px] border-b border-slate-700">
+            <tr>
+              <th class="py-3 px-3">戰隊</th>
+              <th class="py-3 px-3">隊員</th>
+              <th class="py-3 px-3 text-center">邀約</th>
+              <th class="py-3 px-3 text-center">線上出席</th>
+              <th class="py-3 px-3 text-center">實體出席</th>
+              <th class="py-3 px-3 text-center">Demo</th>
+              <th class="py-3 px-3 text-center">成交</th>
+              <th class="py-3 px-3 text-right">個人得分</th>
+              <th class="py-3 px-3 text-right">遲到扣分</th>
+              <th class="py-3 px-3 text-right">戰隊當日結算</th>
+            </tr>
+          </thead>
+          <tbody id="dailyBoardBody" class="divide-y divide-slate-800"></tbody>
+        </table>
+      </div>
+      <p class="mt-2 text-[11px] text-slate-500">＊個人得分為原始點數；戰隊當日結算已含同心協力 ×1.2 加成並扣除遲到海嘯扣分。</p>
+    </section>
+
+    <!-- SECTION 4: TSUNAMI PENALTY LOG -->
+    <section class="parchment-card rounded-3xl p-5 sm:p-6 shadow-2xl border-cyan-700/40">
+      <div class="flex flex-wrap items-center justify-between mb-4 gap-2">
+        <div>
+          <h2 class="text-lg font-bold text-cyan-300 flex items-center gap-2">
+            <i class="fa-solid fa-water text-cyan-400"></i>
+            海嘯扣分紀錄（遲到）
+          </h2>
+          <p class="text-xs text-slate-400">10 分鐘內 −3｜11–20 分鐘 −5｜21–30 分鐘 −10｜30 分鐘以上 −15</p>
+        </div>
+        <span id="penaltyTotalText" class="text-xs bg-slate-800 text-cyan-300 px-3 py-1 rounded-full border border-cyan-500/20 font-semibold">累計扣分：0 點</span>
+      </div>
+      <div class="overflow-x-auto rounded-xl border border-slate-700/50">
+        <table class="w-full text-left text-xs text-slate-300">
+          <thead class="bg-ocean-950 text-cyan-300 font-bold text-[11px] border-b border-slate-700">
+            <tr>
+              <th class="py-3 px-4">日期</th>
+              <th class="py-3 px-4">戰隊</th>
+              <th class="py-3 px-4">遲到隊員</th>
+              <th class="py-3 px-4 text-center">遲到時間</th>
+              <th class="py-3 px-4 text-right">扣分</th>
+              <th class="py-3 px-4">備註</th>
+              <th class="py-3 px-4">登記時間</th>
+              <th class="py-3 px-4 text-center admin-only">管理</th>
+            </tr>
+          </thead>
+          <tbody id="penaltyTableBody" class="divide-y divide-slate-800"></tbody>
         </table>
       </div>
     </section>
@@ -762,12 +949,178 @@
           <button onclick="saveTeamConfigs()" class="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl text-xs font-bold transition">
             儲存戰隊設定
           </button>
-        <div class="p-4 border-t border-slate-800 text-right">
-          <button onclick="closeRulesModal()" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition">
-            關閉
-          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 5: 記分與卡牌規則 (RULES MODAL) -->
+  <!-- ======================================================== -->
+  <div id="rulesModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-3 overflow-y-auto" onclick="if(event.target===this)closeRulesModal()">
+    <div class="bg-ocean-900 border-2 border-amber-600/50 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl relative my-auto">
+      <div class="p-4 sm:p-5 border-b border-amber-600/30 flex items-center justify-between bg-ocean-950/80 rounded-t-2xl">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/40">
+            <i class="fa-solid fa-scroll text-lg"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-amber-300">記分與卡牌規則</h3>
+            <p class="text-xs text-slate-400">航海大冒險完整競賽規則</p>
+          </div>
+        </div>
+        <button onclick="closeRulesModal()" class="text-slate-400 hover:text-white p-2">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="p-4 sm:p-6 overflow-y-auto space-y-6 text-xs sm:text-sm text-slate-300 leading-relaxed">
+
+        <section>
+          <h4 class="font-bold text-amber-300 mb-2 flex items-center gap-2"><i class="fa-solid fa-coins"></i> 一、每日得分指標（每位隊員個別計算）</h4>
+          <div class="overflow-x-auto rounded-xl border border-slate-700/60">
+            <table class="w-full text-left">
+              <thead class="bg-ocean-950 text-amber-200"><tr><th class="py-2 px-3">項目</th><th class="py-2 px-3 text-right">點數</th></tr></thead>
+              <tbody class="divide-y divide-slate-800">
+                <tr><td class="py-2 px-3">邀約 3 人含問卷</td><td class="py-2 px-3 text-right font-mono text-amber-300">+1 / 次</td></tr>
+                <tr><td class="py-2 px-3">客戶實際【線上】出席</td><td class="py-2 px-3 text-right font-mono text-amber-300">+1 / 位</td></tr>
+                <tr><td class="py-2 px-3">客戶實際【實體 / 線下】出席</td><td class="py-2 px-3 text-right font-mono text-amber-300">+2 / 位</td></tr>
+                <tr><td class="py-2 px-3">完成 Demo</td><td class="py-2 px-3 text-right font-mono text-amber-300">+2 / 場</td></tr>
+                <tr><td class="py-2 px-3">正式成交</td><td class="py-2 px-3 text-right font-mono text-amber-300">+5 / 筆</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section>
+          <h4 class="font-bold text-amber-300 mb-2 flex items-center gap-2"><i class="fa-solid fa-handshake"></i> 二、同心協力加成</h4>
+          <p>同一天兩位隊員<strong class="text-amber-200">各自都有至少 1 項指標產出</strong>，當日戰隊總分 <strong class="text-emerald-300">× 1.2 倍</strong>。</p>
+        </section>
+
+        <section>
+          <h4 class="font-bold text-amber-300 mb-2 flex items-center gap-2"><i class="fa-solid fa-dice-d20"></i> 三、抽卡資格</h4>
+          <p>戰隊單日結算達 <strong class="text-rose-300">5 點以上</strong>，即可獲得 1 次航海事件卡抽取資格。</p>
+        </section>
+
+        <section>
+          <h4 class="font-bold text-amber-300 mb-2 flex items-center gap-2"><i class="fa-solid fa-layer-group"></i> 四、航海事件卡</h4>
+          <div id="rulesCardList" class="space-y-2"></div>
+        </section>
+
+        <section>
+          <h4 class="font-bold text-cyan-300 mb-2 flex items-center gap-2"><i class="fa-solid fa-water"></i> 五、遲到遇到海嘯（扣分）</h4>
+          <p class="mb-2">遲到等同船隻遭遇海嘯，依遲到時間扣除戰隊點數：</p>
+          <div class="overflow-x-auto rounded-xl border border-cyan-700/50">
+            <table class="w-full text-left">
+              <thead class="bg-cyan-950/60 text-cyan-200"><tr><th class="py-2 px-3">遲到時間</th><th class="py-2 px-3 text-right">扣分</th></tr></thead>
+              <tbody class="divide-y divide-slate-800">
+                <tr><td class="py-2 px-3">10 分鐘內</td><td class="py-2 px-3 text-right font-mono text-rose-300">−3</td></tr>
+                <tr><td class="py-2 px-3">11 – 20 分鐘</td><td class="py-2 px-3 text-right font-mono text-rose-300">−5</td></tr>
+                <tr><td class="py-2 px-3">21 – 30 分鐘</td><td class="py-2 px-3 text-right font-mono text-rose-300">−10</td></tr>
+                <tr><td class="py-2 px-3">30 分鐘以上</td><td class="py-2 px-3 text-right font-mono text-rose-300">−15</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="mt-2 text-[11px] text-slate-400">扣分直接從戰隊總分扣除，每筆紀錄皆保留於「海嘯扣分紀錄」可供查核。</p>
+        </section>
+
+        <section>
+          <h4 class="font-bold text-amber-300 mb-2 flex items-center gap-2"><i class="fa-solid fa-flag-checkered"></i> 六、航程終點</h4>
+          <p>率先抵達 <strong class="text-amber-200">傳奇黃金島（100 點）</strong> 的戰隊即為航海霸主。</p>
+        </section>
+      </div>
+
+      <div class="p-4 border-t border-slate-800 text-right">
+        <button onclick="closeRulesModal()" class="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition">
+          關閉
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 6: 遲到海嘯扣分 (TSUNAMI PENALTY MODAL) -->
+  <!-- ======================================================== -->
+  <div id="penaltyModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-3 overflow-y-auto">
+    <div class="bg-ocean-900 border-2 border-cyan-600/60 rounded-2xl w-full max-w-md max-h-[92vh] flex flex-col shadow-2xl relative my-auto">
+      <div class="p-4 sm:p-5 border-b border-cyan-600/30 flex items-center justify-between bg-ocean-950/80 rounded-t-2xl">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-cyan-500/20 text-cyan-300 flex items-center justify-center border border-cyan-500/40">
+            <i class="fa-solid fa-water text-lg"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-cyan-300">登記遲到海嘯扣分</h3>
+            <p class="text-xs text-slate-400">輸入遲到分鐘數，系統自動判定扣分級距</p>
+          </div>
+        </div>
+        <button onclick="closePenaltyModal()" class="text-slate-400 hover:text-white p-2">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="penaltyForm" onsubmit="handlePenaltySubmit(event)" class="p-4 sm:p-6 space-y-4 overflow-y-auto text-xs">
+        <div>
+          <label class="block font-semibold text-cyan-200 mb-1">📅 遲到日期</label>
+          <input type="date" id="penaltyDate" required class="w-full bg-slate-900 border border-slate-700 focus:border-cyan-400 rounded-xl px-3 py-2 text-sm text-white focus:outline-none">
+        </div>
+        <div>
+          <label class="block font-semibold text-cyan-200 mb-1">🏴‍☠️ 戰隊</label>
+          <select id="penaltyTeamId" onchange="updatePenaltyMemberOptions()" required class="w-full bg-slate-900 border border-slate-700 focus:border-cyan-400 rounded-xl px-3 py-2 text-sm text-white focus:outline-none"></select>
+        </div>
+        <div>
+          <label class="block font-semibold text-cyan-200 mb-1">🧑‍✈️ 遲到隊員</label>
+          <select id="penaltyMember" required class="w-full bg-slate-900 border border-slate-700 focus:border-cyan-400 rounded-xl px-3 py-2 text-sm text-white focus:outline-none"></select>
+        </div>
+        <div>
+          <label class="block font-semibold text-cyan-200 mb-1">⏱️ 遲到分鐘數</label>
+          <input type="number" id="penaltyMinutes" min="1" step="1" required oninput="updatePenaltyPreview()" placeholder="例如 12" class="w-full bg-slate-900 border border-slate-700 focus:border-cyan-400 rounded-xl px-3 py-2 text-sm text-white focus:outline-none">
+        </div>
+        <div>
+          <label class="block font-semibold text-cyan-200 mb-1">📝 備註（選填）</label>
+          <input type="text" id="penaltyNote" maxlength="100" placeholder="例如：晨會遲到" class="w-full bg-slate-900 border border-slate-700 focus:border-cyan-400 rounded-xl px-3 py-2 text-sm text-white focus:outline-none">
         </div>
 
+        <div class="bg-cyan-950/40 border border-cyan-600/40 rounded-xl p-3.5 flex items-center justify-between">
+          <span id="penaltyTierText" class="text-slate-300">請輸入遲到分鐘數</span>
+          <span id="penaltyPreview" class="text-2xl font-black font-mono text-rose-300">0</span>
+        </div>
+
+        <div class="pt-1 flex items-center justify-end gap-3">
+          <button type="button" onclick="closePenaltyModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition">取消</button>
+          <button type="submit" class="px-6 py-2 font-bold rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 text-white shadow-lg shadow-cyan-500/20 transition">確認扣分</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 8: 跑馬燈公告編輯 (MARQUEE EDITOR MODAL) -->
+  <!-- ======================================================== -->
+  <div id="marqueeModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-3 overflow-y-auto">
+    <div class="bg-ocean-900 border-2 border-amber-600/50 rounded-2xl w-full max-w-lg shadow-2xl relative my-auto">
+      <div class="p-4 sm:p-5 border-b border-amber-600/30 flex items-center justify-between bg-ocean-950/80 rounded-t-2xl">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/40">
+            <i class="fa-solid fa-bullhorn text-lg"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-amber-300">編輯跑馬燈公告</h3>
+            <p class="text-xs text-slate-400">公告戰況或為大家打氣，所有人都看得到</p>
+          </div>
+        </div>
+        <button onclick="closeMarqueeModal()" class="text-slate-400 hover:text-white p-2">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div class="p-4 sm:p-6 space-y-3 text-xs">
+        <label class="block font-semibold text-amber-200">公告內容（每一行是一則，會依序輪播）</label>
+        <textarea id="marqueeInput" rows="5" maxlength="1000" placeholder="例如：🔥 黑珍珠號今日連成 2 筆！大家加油！&#10;⚓ 本週五前抵達暴風眼的隊伍有神祕獎勵！" class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-xl px-3 py-2 text-sm text-white focus:outline-none"></textarea>
+        <p class="text-[11px] text-slate-400">清空內容並儲存即可隱藏跑馬燈。</p>
+      </div>
+      <div class="p-4 border-t border-slate-800 flex justify-end gap-2">
+        <button onclick="closeMarqueeModal()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs">取消</button>
+        <button onclick="saveMarquee()" class="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl text-xs font-bold transition">發布公告</button>
       </div>
     </div>
   </div>
@@ -1004,6 +1357,8 @@
     let teams = JSON.parse(JSON.stringify(DEFAULT_TEAMS));
     let scoreLogs = [];
     let cardsInventory = []; // { id, cardId, teamId, dateDrawn, scheduledDate, status: 'held' | 'scheduled' | 'used', targetTeamId }
+    let penaltyLogs = []; // 海嘯扣分紀錄 { id, date, teamId, member, memberName, minutes, points, note, createdAt }
+    let marqueeText = ''; // 跑馬燈公告
 
     // Google Sheets Direct Connect Configuration
     // ▼▼▼ 把 Apps Script「網頁應用程式」網址 (結尾是 /exec) 貼在下面引號內 ▼▼▼
@@ -1019,6 +1374,8 @@
         teams: JSON.stringify(teams),
         scoreLogs: JSON.stringify(scoreLogs),
         cardsInventory: JSON.stringify(cardsInventory),
+        penaltyLogs: JSON.stringify(penaltyLogs),
+        marqueeText,
         updatedAt: new Date().toISOString()
       };
     };
@@ -1028,6 +1385,8 @@
         if (remote.teams) teams = typeof remote.teams === 'string' ? JSON.parse(remote.teams) : remote.teams;
         if (remote.scoreLogs) scoreLogs = typeof remote.scoreLogs === 'string' ? JSON.parse(remote.scoreLogs) : remote.scoreLogs;
         if (remote.cardsInventory) cardsInventory = typeof remote.cardsInventory === 'string' ? JSON.parse(remote.cardsInventory) : remote.cardsInventory;
+        if (remote.penaltyLogs) penaltyLogs = typeof remote.penaltyLogs === 'string' ? JSON.parse(remote.penaltyLogs) : remote.penaltyLogs;
+        if (typeof remote.marqueeText === 'string') marqueeText = remote.marqueeText;
         
         saveToLocalStorage();
         populateTeamSelects();
@@ -1044,6 +1403,8 @@
           teams,
           scoreLogs,
           cardsInventory,
+          penaltyLogs,
+          marqueeText,
           lastSaved: new Date().toISOString()
         };
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(payload));
@@ -1061,6 +1422,8 @@
           if (parsed.teams && parsed.teams.length > 0) teams = parsed.teams;
           if (parsed.scoreLogs) scoreLogs = parsed.scoreLogs;
           if (parsed.cardsInventory) cardsInventory = parsed.cardsInventory;
+          if (Array.isArray(parsed.penaltyLogs)) penaltyLogs = parsed.penaltyLogs;
+          if (typeof parsed.marqueeText === 'string') marqueeText = parsed.marqueeText;
           return true;
         }
       } catch (e) {
@@ -1096,6 +1459,8 @@
                 teams,
                 scoreLogs,
                 cardsInventory,
+                penaltyLogs,
+                marqueeText,
                 updatedAt: new Date().toISOString()
               }
             })
@@ -1115,8 +1480,8 @@
 
     // Seed Initial Mock Activity only on absolute first launch if empty
     function seedInitialDemoData() {
-      const today = new Date().toISOString().split('T')[0];
-      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+      const today = localDateStr();
+      const yesterday = localDateStr(new Date(Date.now() - 86400000));
 
       scoreLogs = [
         {
@@ -1186,7 +1551,7 @@
       // Set current date string
       const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
       document.getElementById('currentDateDisplay').textContent = new Date().toLocaleDateString('zh-TW', options);
-      document.getElementById('scoreEntryDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('scoreEntryDate').value = localDateStr();
 
       // Render components
       populateTeamSelects();
@@ -1198,6 +1563,9 @@
       renderNauticalMap();
       renderCardStash();
       renderScoreLogs();
+      renderPenaltyLogs();
+      renderDailyBoard();
+      renderMarquee();
       updateGachaEligibilityIndicator();
     }
 
@@ -1236,8 +1604,14 @@
         memberBScore += calculateMemberPoints(l.m2);
       });
 
+      const penaltyPoints = penaltyLogs
+        .filter(p => p.teamId === teamId)
+        .reduce((sum, p) => sum + (Number(p.points) || 0), 0);
+      totalScore -= penaltyPoints;
+
       return {
         totalScore: Math.round(totalScore * 10) / 10,
+        penaltyPoints,
         totalCombos,
         memberAScore,
         memberBScore,
@@ -1248,68 +1622,140 @@
     // ==========================================
     // 4. MAP & TRACK VISUALIZATION
     // ==========================================
+    // 原創海盜帆船圖示（帆、旗、船身彩帶使用戰隊代表色）
+    function shipSvg(color, uid, isLeader) {
+      return `
+        <svg viewBox="0 0 72 64" class="w-full h-full drop-shadow-[0_4px_6px_rgba(0,0,0,0.5)]" aria-hidden="true">
+          <defs>
+            <linearGradient id="hull-${uid}" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#8a5a2b"/><stop offset="1" stop-color="#4a2a10"/>
+            </linearGradient>
+            <linearGradient id="sail-${uid}" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#fffaf0"/><stop offset="1" stop-color="#ead9b5"/>
+            </linearGradient>
+          </defs>
+          ${isLeader ? `<g transform="translate(29 -1)"><path d="M0 9 L2 2 L6 6 L9 0 L12 6 L16 2 L18 9 Z" fill="#fbbf24" stroke="#92400e" stroke-width="1"/></g>` : ''}
+          <!-- 旗子 -->
+          <path d="M37 9 L37 3 L50 6 Z" fill="${color}" stroke="#1e293b" stroke-width="0.8"/>
+          <!-- 桅杆 -->
+          <rect x="35.5" y="3" width="2.6" height="41" rx="1" fill="#3b2410"/>
+          <rect x="22" y="15" width="30" height="1.6" rx="0.8" fill="#3b2410"/>
+          <!-- 主帆 -->
+          <path d="M23 16.5 Q37 21 51 16.5 Q54 27 51 37 Q37 33 23 37 Q20 27 23 16.5 Z" fill="url(#sail-${uid})" stroke="#a8946a" stroke-width="0.8"/>
+          <path d="M23.6 30 Q37 26.5 50.6 30 L51 37 Q37 33 23 37 Z" fill="${color}" opacity="0.85"/>
+          <circle cx="37" cy="23.5" r="4.2" fill="${color}" stroke="#fff" stroke-width="1"/>
+          <circle cx="35.6" cy="22.8" r="0.9" fill="#fff"/><circle cx="38.4" cy="22.8" r="0.9" fill="#fff"/>
+          <!-- 前三角帆 -->
+          <path d="M34 19 L34 40 L12 40 Z" fill="url(#sail-${uid})" stroke="#a8946a" stroke-width="0.8" opacity="0.95"/>
+          <!-- 船身 -->
+          <path d="M4 42 L68 42 L60 56 Q36 60 12 56 Z" fill="url(#hull-${uid})" stroke="#2b1608" stroke-width="1.2"/>
+          <rect x="7" y="45" width="58" height="3" fill="${color}"/>
+          <circle cx="20" cy="51" r="1.6" fill="#1e1208"/><circle cx="30" cy="52" r="1.6" fill="#1e1208"/>
+          <circle cx="40" cy="52" r="1.6" fill="#1e1208"/><circle cx="50" cy="51" r="1.6" fill="#1e1208"/>
+          <path d="M60 42 L70 37" stroke="#3b2410" stroke-width="2" stroke-linecap="round"/>
+        </svg>`;
+    }
+
+    let nauticalMapRendered = false;
+
     function renderNauticalMap() {
       const container = document.getElementById('nauticalMapTracks');
       container.innerHTML = '';
 
-      // Sort teams by total points for map visualization
       const teamsWithScore = teams.map(t => ({
         ...t,
         stats: getTeamStats(t.id)
       })).sort((a, b) => b.stats.totalScore - a.stats.totalScore);
 
-      const targetGoal = 100; // 100 points to Reach the Gold Island
+      const targetGoal = 100; // 抵達傳奇黃金島
+      const animateIn = !nauticalMapRendered;
+      nauticalMapRendered = true;
 
       teamsWithScore.forEach((team, index) => {
-        const percentage = Math.min(100, Math.max(3, (team.stats.totalScore / targetGoal) * 100));
-        
+        const score = team.stats.totalScore;
+        const percentage = Math.min(100, Math.max(0, (score / targetGoal) * 100));
+        const arrived = score >= targetGoal;
+        const isLeader = index === 0 && score > 0;
+        const rankLabel = ['🥇', '🥈', '🥉'][index] || `#${index + 1}`;
+
         const trackHtml = `
-          <div class="relative bg-slate-900/80 rounded-2xl p-3 border border-slate-800">
-            <div class="flex items-center justify-between text-xs mb-1.5">
-              <div class="flex items-center gap-2">
-                <span class="font-cinzel font-black px-2 py-0.5 rounded text-[10px]" style="background-color: ${team.color}33; color: ${team.color}">
-                  #${index + 1}
-                </span>
-                <span class="font-bold text-slate-200">${team.name}</span>
-                <span class="text-[11px] text-slate-400">(${team.memberA} & ${team.memberB})</span>
+          <div class="nautical-lane relative rounded-2xl border ${isLeader ? 'border-amber-400/60 shadow-lg shadow-amber-500/10' : 'border-cyan-900/60'} overflow-hidden">
+            <!-- 標題列 -->
+            <div class="relative z-20 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs px-3 pt-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="font-black text-sm w-7 text-center">${rankLabel}</span>
+                <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${team.color}; box-shadow:0 0 8px ${team.color}"></span>
+                <span class="font-bold text-slate-100 truncate">${escapeHtml(team.name)}</span>
+                <span class="text-[11px] text-cyan-100/60 hidden sm:inline">(${escapeHtml(team.memberA)} & ${escapeHtml(team.memberB)})</span>
               </div>
-              <div class="font-mono font-bold text-amber-300">
-                ${team.stats.totalScore.toFixed(1)} <span class="text-[10px] text-slate-400">/ 100 點</span>
+              <div class="font-mono font-bold ${score < 0 ? 'text-rose-300' : 'text-amber-300'}">
+                ${score.toFixed(1)} <span class="text-[10px] text-cyan-100/50">/ 100 點</span>
+                ${arrived ? '<span class="ml-1 text-amber-300">🏆 已登島</span>' : ''}
               </div>
             </div>
 
-            <!-- Ocean Track Bar -->
-            <div class="w-full h-5 bg-ocean-950 rounded-full relative overflow-visible border border-slate-700/60 flex items-center">
-              
-              <!-- Checkpoint markers -->
-              <div class="absolute left-1/4 top-0 bottom-0 w-px bg-blue-500/30"></div>
-              <div class="absolute left-1/2 top-0 bottom-0 w-px bg-purple-500/30"></div>
-              <div class="absolute left-3/4 top-0 bottom-0 w-px bg-amber-500/30"></div>
+            <!-- 海面航道 -->
+            <div class="relative h-16 sm:h-[72px] mt-1">
+              <div class="ocean-waves absolute inset-0"></div>
+              <div class="ocean-waves ocean-waves-2 absolute inset-0"></div>
 
-              <!-- Filled wake trail -->
-              <div class="h-full rounded-full transition-all duration-1000 opacity-60" 
-                   style="width: ${percentage}%; background: linear-gradient(90deg, transparent, ${team.color});">
-              </div>
+              <div class="absolute inset-y-0 left-6 right-12 sm:left-8 sm:right-16">
+                <!-- 地標 -->
+                <div class="lane-mark" style="left:0%"><span>⚓</span></div>
+                <div class="lane-mark" style="left:25%"><span>🪸</span><em>25</em></div>
+                <div class="lane-mark" style="left:50%"><span>🌀</span><em>50</em></div>
+                <div class="lane-mark" style="left:75%"><span>🦈</span><em>75</em></div>
 
-              <!-- Ship Icon Pin -->
-              <div class="absolute transform -translate-x-1/2 -top-2 transition-all duration-1000 z-10" 
-                   style="left: ${percentage}%;">
-                <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm shadow-lg border-2 border-amber-300 animate-float"
-                     style="background: ${team.color}; color: #07162c;">
-                  <i class="fa-solid ${team.icon}"></i>
+                <!-- 航跡 -->
+                <div class="ship-wake absolute bottom-[14px] left-0 h-2.5 rounded-full"
+                     style="--to:${percentage}%; width:${animateIn ? 0 : percentage}%; background:linear-gradient(90deg, transparent, ${team.color}55 40%, ${team.color}cc); box-shadow:0 0 10px ${team.color}66;"></div>
+
+                <!-- 船 -->
+                <div class="ship-anchor absolute bottom-1 z-10" style="--to:${percentage}%; left:${animateIn ? 0 : percentage}%;">
+                  <div class="ship-bob w-12 h-11 sm:w-14 sm:h-12" style="animation-delay:-${(index * 0.37).toFixed(2)}s">
+                    ${shipSvg(team.color, team.id + '-' + index, isLeader)}
+                  </div>
+                  <div class="ship-splash"></div>
                 </div>
               </div>
 
+              <!-- 終點黃金島 -->
+              <div class="absolute right-1 sm:right-2 bottom-1 text-2xl sm:text-3xl select-none ${arrived ? 'gold-island-glow' : ''}" title="傳奇黃金島 (100 點)">🏝️</div>
             </div>
           </div>
         `;
         container.insertAdjacentHTML('beforeend', trackHtml);
       });
+
+      if (animateIn) {
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          container.querySelectorAll('.ship-anchor').forEach(el => el.style.left = el.style.getPropertyValue('--to'));
+          container.querySelectorAll('.ship-wake').forEach(el => el.style.width = el.style.getPropertyValue('--to'));
+        }));
+      }
     }
 
     // ==========================================
     // 5. LEADERBOARD RENDERING
     // ==========================================
+    const lastShownScores = {};
+
+    // 分數跳動動畫
+    function animateCount(el, from, to) {
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches || from === to) {
+        el.textContent = to.toFixed(1);
+        return;
+      }
+      const start = performance.now(), dur = 1200;
+      const step = now => {
+        const t = Math.min(1, (now - start) / dur);
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.textContent = (from + (to - from) * eased).toFixed(1);
+        if (t < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }
+
     function renderLeaderboard() {
       const container = document.getElementById('leaderboardList');
       container.innerHTML = '';
@@ -1327,56 +1773,91 @@
         document.getElementById('leaderTeamText').textContent = `👑 ${enrichedTeams[0].name} (${enrichedTeams[0].stats.totalScore.toFixed(1)} 點)`;
       }
 
-      enrichedTeams.forEach((team, rankIndex) => {
-        const isLeader = rankIndex === 0;
-        const rankBadge = isLeader 
-          ? '<span class="text-amber-400 text-lg"><i class="fa-solid fa-crown"></i> 1</span>'
-          : rankIndex === 1
-          ? '<span class="text-slate-300 font-bold text-sm">2</span>'
-          : rankIndex === 2
-          ? '<span class="text-amber-600 font-bold text-sm">3</span>'
-          : `<span class="text-slate-500 font-mono text-sm">${rankIndex + 1}</span>`;
+      const today = localDateStr();
+      const topScore = enrichedTeams.length ? enrichedTeams[0].stats.totalScore : 0;
+      const tiers = ['gold', 'silver', 'bronze'];
 
-        // Check active cards held by team
+      enrichedTeams.forEach((team, rankIndex) => {
+        const score = team.stats.totalScore;
+        const tier = score > 0 ? tiers[rankIndex] : null;
+        const isLeader = rankIndex === 0 && score > 0;
+        const progress = Math.min(100, Math.max(0, score));
+        const sailedToday = scoreLogs.some(l => l.teamId === team.id && l.date === today);
+
+        const a = Math.max(0, team.stats.memberAScore), b = Math.max(0, team.stats.memberBScore);
+        const aPct = a + b > 0 ? Math.round(a / (a + b) * 100) : 50;
+
         const heldCards = cardsInventory.filter(c => c.teamId === team.id && c.status !== 'used');
         const cardsBadgesHtml = heldCards.map(c => {
-          const cardDef = CARD_DATABASE.find(d => d.id === c.cardId);
-          return `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-slate-800 border border-amber-500/30 text-amber-300" title="${cardDef.desc}">
-            <i class="fa-solid ${cardDef.icon}"></i> ${cardDef.name}
+          const cardDef = CARD_DATABASE.find(d => d.id === c.cardId) || { name: '神祕卡', icon: 'fa-question', desc: '', color: '#f59e0b' };
+          return `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold border" style="background:${cardDef.color}1f;border-color:${cardDef.color}66;color:${cardDef.color}" title="${escapeHtml(cardDef.desc)}">
+            <i class="fa-solid ${cardDef.icon}"></i> ${escapeHtml(cardDef.name)}
           </span>`;
         }).join('');
 
-        const rowHtml = `
-          <div class="bg-ocean-950/70 hover:bg-ocean-950 border ${isLeader ? 'border-amber-500/70 shadow-lg shadow-amber-500/10' : 'border-slate-800'} rounded-2xl p-3.5 transition flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-3">
-              <div class="w-8 text-center">${rankBadge}</div>
-              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg border border-white/20" style="background-color: ${team.color}25; color: ${team.color}">
-                <i class="fa-solid ${team.icon}"></i>
-              </div>
-              <div>
-                <div class="flex items-center gap-2">
-                  <h4 class="font-bold text-white text-sm sm:text-base">${team.name}</h4>
-                  ${team.stats.totalCombos > 0 ? `<span class="bg-amber-500/20 text-amber-300 text-[10px] px-2 py-0.2 rounded-full border border-amber-500/40">同心協力 × ${team.stats.totalCombos}</span>` : ''}
-                </div>
-                <div class="text-xs text-slate-400 mt-0.5 flex flex-wrap gap-2">
-                  <span>搭檔: <strong class="text-slate-200">${team.memberA}</strong> (${team.stats.memberAScore}點) + <strong class="text-slate-200">${team.memberB}</strong> (${team.stats.memberBScore}點)</span>
-                </div>
-              </div>
-            </div>
+        const gap = topScore - score;
+        const motto = isLeader ? '🏴‍☠️ 稱霸七海中！'
+          : score <= 0 && topScore <= 0 ? '⛵ 等待啟航'
+          : `距榜首 ${gap.toFixed(1)} 點`;
 
-            <!-- Score and Cards Badges -->
-            <div class="flex items-center gap-4 ml-auto">
-              <div class="hidden sm:flex flex-wrap gap-1 max-w-xs justify-end">
-                ${cardsBadgesHtml || '<span class="text-[11px] text-slate-600">無手牌</span>'}
+        const rowHtml = `
+          <div class="lb-row ${tier ? 'lb-' + tier : ''} relative rounded-2xl p-3 sm:p-3.5 border overflow-hidden" style="--team:${team.color}; animation-delay:${rankIndex * 70}ms">
+            ${isLeader ? '<div class="lb-shine"></div>' : ''}
+            <div class="relative flex items-center gap-2 sm:gap-3">
+
+              <!-- 名次徽章 -->
+              <div class="lb-medal ${tier ? 'medal-' + tier : 'medal-plain'}">
+                ${isLeader ? '<i class="fa-solid fa-crown text-[10px] absolute -top-2 left-1/2 -translate-x-1/2 text-amber-300 drop-shadow"></i>' : ''}
+                <span>${rankIndex + 1}</span>
               </div>
-              <div class="text-right min-w-[70px]">
-                <div class="text-lg sm:text-xl font-black font-mono text-amber-300">${team.stats.totalScore.toFixed(1)}</div>
-                <div class="text-[10px] text-slate-400 uppercase tracking-wider">探索點數</div>
+
+              <!-- 船隻頭像 -->
+              <div class="lb-avatar relative w-11 h-11 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl overflow-hidden shrink-0 border border-white/15">
+                <div class="ocean-waves absolute inset-x-0 bottom-0" style="height:16px;background-size:40px 13px"></div>
+                <div class="ship-bob absolute inset-x-1 top-1 bottom-1" style="animation-delay:-${(rankIndex * 0.45).toFixed(2)}s">
+                  ${shipSvg(team.color, 'lb-' + team.id, false)}
+                </div>
+              </div>
+
+              <!-- 隊伍資訊 -->
+              <div class="flex-1 min-w-0">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <h4 class="font-black text-white text-[13px] sm:text-base leading-tight">${escapeHtml(team.name)}</h4>
+                  ${sailedToday ? '<span class="lb-chip bg-orange-500/15 text-orange-300 border-orange-500/40">🔥 今日出航</span>' : ''}
+                  ${team.stats.totalCombos > 0 ? `<span class="lb-chip bg-emerald-500/15 text-emerald-300 border-emerald-500/40">🤝 同心 ×${team.stats.totalCombos}</span>` : ''}
+                  ${team.stats.penaltyPoints > 0 ? `<span class="lb-chip bg-cyan-500/15 text-cyan-300 border-cyan-500/40" title="遲到海嘯扣分">🌊 −${team.stats.penaltyPoints}</span>` : ''}
+                </div>
+
+                <!-- 隊員貢獻比例 -->
+                <div class="mt-1.5 text-[11px] text-slate-300 flex items-center justify-between gap-2">
+                  <span class="truncate"><b class="text-slate-100">${escapeHtml(team.memberA)}</b> <span class="font-mono text-amber-200">${team.stats.memberAScore}</span></span>
+                  <span class="truncate text-right"><span class="font-mono text-amber-200">${team.stats.memberBScore}</span> <b class="text-slate-100">${escapeHtml(team.memberB)}</b></span>
+                </div>
+                <div class="mt-1 h-1.5 rounded-full overflow-hidden flex bg-slate-800">
+                  <div class="h-full" style="width:${aPct}%;background:${team.color}"></div>
+                  <div class="h-full" style="width:${100 - aPct}%;background:${team.color};opacity:.45"></div>
+                </div>
+
+                ${cardsBadgesHtml ? `<div class="mt-2 flex flex-wrap gap-1">${cardsBadgesHtml}</div>` : ''}
+              </div>
+
+              <!-- 分數 -->
+              <div class="text-right ml-auto shrink-0 w-[68px] sm:w-[92px]">
+                <div class="lb-score text-xl sm:text-3xl font-black font-mono leading-none ${score < 0 ? 'text-rose-300' : ''}" data-team="${team.id}">${score.toFixed(1)}</div>
+                <div class="text-[10px] text-slate-400 mt-1">${motto}</div>
+                <div class="mt-1.5 h-1 w-full rounded-full bg-slate-800 overflow-hidden" title="距黃金島 ${Math.max(0, 100 - score).toFixed(1)} 點">
+                  <div class="h-full rounded-full" style="width:${progress}%;background:linear-gradient(90deg,${team.color}88,${team.color})"></div>
+                </div>
               </div>
             </div>
           </div>
         `;
         container.insertAdjacentHTML('beforeend', rowHtml);
+
+        const scoreEl = container.querySelector(`.lb-score[data-team="${team.id}"]`);
+        const prev = lastShownScores[team.id] ?? 0;
+        animateCount(scoreEl, prev, score);
+        lastShownScores[team.id] = score;
       });
     }
 
@@ -1489,7 +1970,7 @@
                 : '<span class="text-slate-500 text-[10px]">未達5點</span>'}
             </td>
             <td class="py-3 px-4 text-center">
-              <button onclick="deleteLogEntry('${log.id}')" class="text-slate-500 hover:text-rose-400 p-1 transition" title="刪除本筆紀錄">
+              <button onclick="deleteLogEntry('${log.id}')" class="admin-only text-slate-500 hover:text-rose-400 p-1 transition" title="刪除本筆紀錄">
                 <i class="fa-solid fa-trash-can"></i>
               </button>
             </td>
@@ -1628,7 +2109,7 @@
 
       // Trigger Confetti if great score
       if (finalScore >= 5.0) {
-        confetti({
+        if (window.confetti) confetti({
           particleCount: 80,
           spread: 60,
           origin: { y: 0.6 }
@@ -1719,7 +2200,7 @@
         instanceId: 'inst-' + Date.now(),
         cardId: currentDrawnCard.id,
         teamId: team.id,
-        dateDrawn: new Date().toISOString().split('T')[0],
+        dateDrawn: localDateStr(),
         scheduledDate: '',
         status: 'held',
         targetTeamId: null
@@ -1728,7 +2209,7 @@
       cardsInventory.push(newInventoryItem);
 
       // Celebrate
-      confetti({
+      if (window.confetti) confetti({
         particleCount: 120,
         spread: 90,
         origin: { y: 0.5 }
@@ -1743,7 +2224,7 @@
     }
 
     function updateGachaEligibilityIndicator() {
-      const today = new Date().toISOString().split('T')[0];
+      const today = localDateStr();
       const todayEligible = scoreLogs.some(l => l.date === today && l.finalScore >= 5.0);
       const badge = document.getElementById('gachaEligibleBadge');
       if (todayEligible) {
@@ -1843,7 +2324,7 @@
         instanceId: 'inst-' + Date.now(),
         cardId: card.id,
         teamId: team.id,
-        dateDrawn: new Date().toISOString().split('T')[0],
+        dateDrawn: localDateStr(),
         scheduledDate: '',
         status: 'held',
         targetTeamId: null
@@ -1926,6 +2407,19 @@
     // 12. RULES MODAL & UTILS
     // ==========================================
     function showRulesModal() {
+      const list = document.getElementById('rulesCardList');
+      if (list) {
+        list.innerHTML = CARD_DATABASE.map(c => `
+          <div class="flex items-start gap-3 bg-slate-900/70 border border-slate-700/60 rounded-xl p-3">
+            <div class="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center" style="background:${c.color}22;color:${c.color}">
+              <i class="fa-solid ${c.icon}"></i>
+            </div>
+            <div>
+              <div class="font-bold text-amber-200">${c.name} <span class="text-[10px] font-mono text-slate-400 ml-1">${c.category}・${c.rarity}</span></div>
+              <div class="text-[12px] text-slate-300 mt-0.5">${c.desc}</div>
+            </div>
+          </div>`).join('');
+      }
       document.getElementById('rulesModal').classList.remove('hidden');
     }
 
@@ -1991,6 +2485,8 @@
           if (remoteData.teams && remoteData.teams.length > 0) teams = remoteData.teams;
           if (remoteData.scoreLogs) scoreLogs = remoteData.scoreLogs;
           if (remoteData.cardsInventory) cardsInventory = remoteData.cardsInventory;
+          if (Array.isArray(remoteData.penaltyLogs)) penaltyLogs = remoteData.penaltyLogs;
+          if (typeof remoteData.marqueeText === 'string') marqueeText = remoteData.marqueeText;
 
           saveToLocalStorage();
           populateTeamSelects();
@@ -2121,16 +2617,305 @@ function doPost(e) {
         exportDate: new Date().toISOString(),
         teams,
         scoreLogs,
-        cardsInventory
+        cardsInventory,
+        penaltyLogs,
+        marqueeText
       };
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataPayload, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `pirate_sales_quest_${new Date().toISOString().split('T')[0]}.json`);
+      downloadAnchor.setAttribute("download", `pirate_sales_quest_${localDateStr()}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
       showToast('競賽數據備份 JSON 匯出完成！', 'success');
+    }
+
+    // ==========================================
+    // 15. 遲到海嘯扣分
+    // ==========================================
+    function escapeHtml(str) {
+      return String(str ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    }
+
+    function getPenaltyForMinutes(minutes) {
+      const m = Number(minutes) || 0;
+      if (m <= 0) return { points: 0, tier: '請輸入遲到分鐘數' };
+      if (m <= 10) return { points: 3, tier: '10 分鐘內' };
+      if (m <= 20) return { points: 5, tier: '11 – 20 分鐘' };
+      if (m <= 30) return { points: 10, tier: '21 – 30 分鐘' };
+      return { points: 15, tier: '30 分鐘以上' };
+    }
+
+    function openPenaltyModal() {
+      const teamSel = document.getElementById('penaltyTeamId');
+      teamSel.innerHTML = '';
+      teams.forEach(t => teamSel.add(new Option(t.name, t.id)));
+      document.getElementById('penaltyForm').reset();
+      document.getElementById('penaltyDate').value = new Date().toLocaleDateString('sv-SE');
+      updatePenaltyMemberOptions();
+      updatePenaltyPreview();
+      document.getElementById('penaltyModal').classList.remove('hidden');
+    }
+
+    function closePenaltyModal() {
+      document.getElementById('penaltyModal').classList.add('hidden');
+    }
+
+    function updatePenaltyMemberOptions() {
+      const team = teams.find(t => t.id === document.getElementById('penaltyTeamId').value);
+      const memberSel = document.getElementById('penaltyMember');
+      memberSel.innerHTML = '';
+      if (team) {
+        memberSel.add(new Option(team.memberA, 'A'));
+        memberSel.add(new Option(team.memberB, 'B'));
+      }
+    }
+
+    function updatePenaltyPreview() {
+      const { points, tier } = getPenaltyForMinutes(document.getElementById('penaltyMinutes').value);
+      document.getElementById('penaltyTierText').textContent = points ? `級距：${tier}` : tier;
+      document.getElementById('penaltyPreview').textContent = points ? `−${points}` : '0';
+    }
+
+    function handlePenaltySubmit(e) {
+      e.preventDefault();
+      const date = document.getElementById('penaltyDate').value;
+      const teamId = document.getElementById('penaltyTeamId').value;
+      const member = document.getElementById('penaltyMember').value;
+      const minutes = Math.floor(Number(document.getElementById('penaltyMinutes').value));
+      const note = document.getElementById('penaltyNote').value.trim();
+      const team = teams.find(t => t.id === teamId);
+      const { points } = getPenaltyForMinutes(minutes);
+
+      if (!date || !team || !member || !points) {
+        showToast('請完整填寫日期、戰隊、隊員與遲到分鐘數', 'error');
+        return;
+      }
+
+      penaltyLogs.push({
+        id: 'pen-' + Date.now(),
+        date,
+        teamId,
+        member,
+        memberName: member === 'A' ? team.memberA : team.memberB,
+        minutes,
+        points,
+        note,
+        createdAt: new Date().toISOString()
+      });
+
+      closePenaltyModal();
+      renderAll();
+      triggerCloudSave();
+      showToast(`🌊 已登記：${team.name} 扣 ${points} 點`, 'info');
+    }
+
+    function deletePenaltyEntry(penId) {
+      const entry = penaltyLogs.find(p => p.id === penId);
+      if (!entry) return;
+      if (!confirm(`確定刪除這筆扣分紀錄？（${entry.date} ${entry.memberName} −${entry.points}）`)) return;
+      penaltyLogs = penaltyLogs.filter(p => p.id !== penId);
+      renderAll();
+      triggerCloudSave();
+      showToast('已刪除該筆扣分紀錄', 'info');
+    }
+
+    function renderPenaltyLogs() {
+      const tbody = document.getElementById('penaltyTableBody');
+      if (!tbody) return;
+      const total = penaltyLogs.reduce((s, p) => s + (Number(p.points) || 0), 0);
+      document.getElementById('penaltyTotalText').textContent = `累計扣分：${total} 點（${penaltyLogs.length} 筆）`;
+
+      if (penaltyLogs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-500 text-xs">目前沒有遲到紀錄，風平浪靜 ⛵</td></tr>`;
+        return;
+      }
+
+      const sorted = [...penaltyLogs].sort((a, b) => (b.date + b.createdAt).localeCompare(a.date + a.createdAt));
+      tbody.innerHTML = sorted.map(p => {
+        const team = teams.find(t => t.id === p.teamId) || { name: '未知戰隊' };
+        const created = p.createdAt ? new Date(p.createdAt).toLocaleString('zh-TW', { hour12: false }) : '';
+        return `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="py-3 px-4 font-mono">${escapeHtml(p.date)}</td>
+            <td class="py-3 px-4 font-bold text-slate-200">${escapeHtml(team.name)}</td>
+            <td class="py-3 px-4 text-cyan-200">${escapeHtml(p.memberName)}</td>
+            <td class="py-3 px-4 text-center font-mono">${Number(p.minutes)} 分鐘</td>
+            <td class="py-3 px-4 text-right font-mono font-bold text-rose-300 text-sm">−${Number(p.points)}</td>
+            <td class="py-3 px-4 text-slate-400">${escapeHtml(p.note) || '—'}</td>
+            <td class="py-3 px-4 text-[11px] text-slate-500 font-mono">${escapeHtml(created)}</td>
+            <td class="py-3 px-4 text-center admin-only">
+              <button onclick="deletePenaltyEntry('${p.id}')" class="text-slate-500 hover:text-rose-400 p-1 transition" title="刪除本筆扣分">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </td>
+          </tr>`;
+      }).join('');
+    }
+
+    // ==========================================
+    // 17. 每日個人戰績（每人每天都有一列，0 分也顯示）
+    // ==========================================
+    const METRIC_KEYS = ['invite', 'attendOnline', 'attendOffline', 'demo', 'deal'];
+
+    function localDateStr(d = new Date()) {
+      return d.toLocaleDateString('sv-SE'); // YYYY-MM-DD（台灣時區）
+    }
+
+    // 計算某一天每支隊伍、每位隊員的戰績
+    function computeDailyRows(date) {
+      const rows = [];
+      teams.forEach(team => {
+        const dayLogs = scoreLogs.filter(l => l.date === date && l.teamId === team.id);
+        const dayPens = penaltyLogs.filter(p => p.date === date && p.teamId === team.id);
+        const teamFinal = dayLogs.reduce((s, l) => s + (Number(l.finalScore) || 0), 0)
+                        - dayPens.reduce((s, p) => s + (Number(p.points) || 0), 0);
+        const combo = dayLogs.some(l => l.comboTriggered);
+
+        [['A', 'm1', team.memberA], ['B', 'm2', team.memberB]].forEach(([slot, key, name]) => {
+          const metrics = {};
+          METRIC_KEYS.forEach(k => metrics[k] = dayLogs.reduce((s, l) => s + (Number(l[key]?.[k]) || 0), 0));
+          const penalty = dayPens.filter(p => p.member === slot).reduce((s, p) => s + (Number(p.points) || 0), 0);
+          const lateMinutes = dayPens.filter(p => p.member === slot).reduce((s, p) => s + (Number(p.minutes) || 0), 0);
+          rows.push({
+            date, team, slot, name, metrics,
+            points: calculateMemberPoints(metrics),
+            penalty, lateMinutes,
+            teamFinal: Math.round(teamFinal * 10) / 10,
+            combo,
+            hasEntry: dayLogs.length > 0
+          });
+        });
+      });
+      return rows;
+    }
+
+    function renderDailyBoard() {
+      const input = document.getElementById('dailyViewDate');
+      const tbody = document.getElementById('dailyBoardBody');
+      if (!input || !tbody) return;
+      if (!input.value) input.value = localDateStr();
+      const date = input.value;
+      const rows = computeDailyRows(date);
+
+      const totalPts = rows.reduce((s, r) => s + r.points, 0);
+      const totalPen = rows.reduce((s, r) => s + r.penalty, 0);
+      const scored = rows.filter(r => r.points > 0).length;
+      const teamsReported = new Set(rows.filter(r => r.hasEntry).map(r => r.team.id)).size;
+      document.getElementById('dailyBoardSummary').innerHTML = `
+        <span class="bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full">已登記戰隊 <b class="text-amber-300">${teamsReported}</b> / ${teams.length}</span>
+        <span class="bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full">有得分隊員 <b class="text-amber-300">${scored}</b> / ${rows.length}</span>
+        <span class="bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full">全員原始得分 <b class="text-amber-300">${totalPts}</b></span>
+        <span class="bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full">遲到扣分 <b class="text-rose-300">−${totalPen}</b></span>`;
+
+      tbody.innerHTML = rows.map(r => {
+        const zero = r.points === 0;
+        const m = r.metrics;
+        const cell = v => `<td class="py-2.5 px-3 text-center font-mono ${v ? 'text-slate-100' : 'text-slate-600'}">${v}</td>`;
+        const teamCell = r.slot === 'A' ? `
+          <td rowspan="2" class="py-2.5 px-3 font-bold text-slate-200 align-middle border-r border-slate-800">
+            <span class="inline-block w-2 h-2 rounded-full mr-1" style="background:${r.team.color}"></span>${escapeHtml(r.team.name)}
+            ${r.combo ? '<div class="mt-1"><span class="bg-emerald-950 text-emerald-300 border border-emerald-600 px-1.5 py-0.5 rounded-full text-[10px]">×1.2 同心協力</span></div>' : ''}
+            ${!r.hasEntry ? '<div class="mt-1 text-[10px] text-slate-500 font-normal">當日未登記</div>' : ''}
+          </td>` : '';
+        const teamTotalCell = r.slot === 'A' ? `
+          <td rowspan="2" class="py-2.5 px-3 text-right font-mono font-bold text-sm align-middle border-l border-slate-800 ${r.teamFinal > 0 ? 'text-amber-300' : r.teamFinal < 0 ? 'text-rose-300' : 'text-slate-500'}">${r.teamFinal.toFixed(1)}</td>` : '';
+        return `
+          <tr class="${zero ? 'bg-slate-950/30' : 'hover:bg-slate-800/40'} ${r.slot === 'B' ? 'border-b-2 border-slate-700/70' : ''}">
+            ${teamCell}
+            <td class="py-2.5 px-3 ${zero ? 'text-slate-400' : 'text-amber-200 font-bold'}">${escapeHtml(r.name)}</td>
+            ${cell(m.invite)}${cell(m.attendOnline)}${cell(m.attendOffline)}${cell(m.demo)}${cell(m.deal)}
+            <td class="py-2.5 px-3 text-right font-mono font-bold ${zero ? 'text-slate-500' : 'text-amber-300'}">${r.points}</td>
+            <td class="py-2.5 px-3 text-right font-mono ${r.penalty ? 'text-rose-300 font-bold' : 'text-slate-600'}">${r.penalty ? '−' + r.penalty + `<span class="text-[10px] text-slate-400 ml-1">(${r.lateMinutes}分)</span>` : '0'}</td>
+            ${teamTotalCell}
+          </tr>`;
+      }).join('');
+    }
+
+    function shiftDailyDate(delta) {
+      const input = document.getElementById('dailyViewDate');
+      const d = new Date((input.value || localDateStr()) + 'T12:00:00');
+      d.setDate(d.getDate() + delta);
+      input.value = localDateStr(d);
+      renderDailyBoard();
+    }
+
+    function setDailyDateToday() {
+      document.getElementById('dailyViewDate').value = localDateStr();
+      renderDailyBoard();
+    }
+
+    // 匯出：從第一筆紀錄到今天，每天 × 每人一列（0 分也有）
+    function exportDailyCsv() {
+      const allDates = [...scoreLogs.map(l => l.date), ...penaltyLogs.map(p => p.date)].filter(Boolean).sort();
+      const today = localDateStr();
+      const start = allDates[0] || today;
+      const end = allDates.length && allDates[allDates.length - 1] > today ? allDates[allDates.length - 1] : today;
+
+      const header = ['日期', '戰隊', '隊員', '邀約', '線上出席', '實體出席', 'Demo', '成交', '個人得分', '遲到分鐘', '遲到扣分', '個人淨分', '戰隊當日結算', '同心協力'];
+      const lines = [header];
+      const d = new Date(start + 'T12:00:00');
+      const endD = new Date(end + 'T12:00:00');
+      while (d <= endD) {
+        computeDailyRows(localDateStr(d)).forEach(r => {
+          const m = r.metrics;
+          lines.push([r.date, r.team.name, r.name, m.invite, m.attendOnline, m.attendOffline, m.demo, m.deal,
+            r.points, r.lateMinutes, r.penalty ? -r.penalty : 0, r.points - r.penalty, r.teamFinal, r.combo ? '是' : '否']);
+        });
+        d.setDate(d.getDate() + 1);
+      }
+      const csv = '﻿' + lines.map(row => row.map(v => {
+        const s = String(v);
+        return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+      }).join(',')).join('\r\n');
+
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+      a.download = `每日個人戰績_${start}_至_${end}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showToast(`📊 已匯出 ${start} ～ ${end} 每日個人戰績`, 'success');
+    }
+
+    // ==========================================
+    // 16. 跑馬燈公告
+    // ==========================================
+    function renderMarquee() {
+      const bar = document.getElementById('marqueeBar');
+      const track = document.getElementById('marqueeTrack');
+      if (!bar || !track) return;
+      const lines = String(marqueeText || '').split('\n').map(l => l.trim()).filter(Boolean);
+      if (lines.length === 0) {
+        bar.classList.add('hidden');
+        return;
+      }
+      const joined = lines.map(escapeHtml).join('<span class="mx-8 opacity-60">⚓</span>');
+      if (track.dataset.content !== joined) {
+        track.dataset.content = joined;
+        track.innerHTML = joined;
+        const textLen = lines.join('').length;
+        track.style.setProperty('--marquee-duration', Math.max(12, Math.round(textLen * 0.35 + 10)) + 's');
+      }
+      bar.classList.remove('hidden');
+    }
+
+    function openMarqueeModal() {
+      document.getElementById('marqueeInput').value = marqueeText || '';
+      document.getElementById('marqueeModal').classList.remove('hidden');
+    }
+
+    function closeMarqueeModal() {
+      document.getElementById('marqueeModal').classList.add('hidden');
+    }
+
+    function saveMarquee() {
+      marqueeText = document.getElementById('marqueeInput').value.trim();
+      closeMarqueeModal();
+      renderMarquee();
+      triggerCloudSave();
+      showToast(marqueeText ? '📣 跑馬燈公告已發布！' : '跑馬燈已關閉', 'success');
     }
 
     // ==========================================
@@ -2154,6 +2939,7 @@ function doPost(e) {
       if (!pw) return false;
       if (await sha256Hex(pw.trim()) === ADMIN_PASSWORD_HASH) {
         try { localStorage.setItem(ADMIN_STORAGE_KEY, ADMIN_PASSWORD_HASH); } catch (e) {}
+        applyAdminUI();
         showToast('✅ 管理員已登入，這台裝置之後不需再輸入密碼', 'success');
         return true;
       }
@@ -2161,8 +2947,34 @@ function doPost(e) {
       return false;
     }
 
-    // 需要密碼才能使用的功能
-    ['openScoreModal', 'deleteLogEntry', 'openGachaModal', 'openCardManagementModal', 'openConfigModal', 'openGoogleSheetModal']
+    // 依登入狀態顯示/隱藏管理按鈕
+    function applyAdminUI() {
+      const admin = isAdmin();
+      document.body.classList.toggle('is-admin', admin);
+      const btn = document.getElementById('adminToggleBtn');
+      if (btn) {
+        btn.title = admin ? '管理員已登入（點擊登出）' : '管理員登入';
+        btn.innerHTML = admin ? '<i class="fa-solid fa-lock-open text-base text-emerald-400"></i>' : '<i class="fa-solid fa-lock text-base"></i>';
+      }
+    }
+
+    async function toggleAdminLogin() {
+      if (isAdmin()) {
+        if (!confirm('要登出管理員嗎？登出後這台裝置只能瀏覽。')) return;
+        try { localStorage.removeItem(ADMIN_STORAGE_KEY); } catch (e) {}
+        applyAdminUI();
+        showToast('已登出管理員', 'info');
+      } else {
+        await ensureAdmin();
+      }
+    }
+
+    applyAdminUI();
+    window.addEventListener('load', applyAdminUI);
+
+    // 需要密碼才能使用的功能（雙重保險：按鈕已對訪客隱藏）
+    ['openScoreModal', 'deleteLogEntry', 'openGachaModal', 'openCardManagementModal', 'openConfigModal', 'openGoogleSheetModal',
+     'openDeployModal', 'openPenaltyModal', 'deletePenaltyEntry', 'openMarqueeModal', 'saveMarquee']
       .forEach(name => {
         const original = window[name];
         window[name] = async function (...args) {
