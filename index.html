@@ -1006,22 +1006,12 @@
     let cardsInventory = []; // { id, cardId, teamId, dateDrawn, scheduledDate, status: 'held' | 'scheduled' | 'used', targetTeamId }
 
     // Google Sheets Direct Connect Configuration
-    let gasUrl = 'https://script.google.com/macros/s/AKfycbye3TlHlm49zolhwtoxjd9JoDw7yQV74uD0OmbHSyzzDrvsfqLanjiAAewAa_7TWByT/exec';
+    // ▼▼▼ 把 Apps Script「網頁應用程式」網址 (結尾是 /exec) 貼在下面引號內 ▼▼▼
+    const DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbye3TlHlm49zolhwtoxjd9JoDw7yQV74uD0OmbHSyzzDrvsfqLanjiAAewAa_7TWByT/exec';
+    // ▲▲▲ 貼上後所有裝置打開網站就會自動連到試算表，不必再手動設定 ▲▲▲
+    let gasUrl = DEFAULT_GAS_URL;
     const GAS_CONFIG_KEY = 'PIRATE_QUEST_GAS_URL_V3';
     const LOCAL_STORAGE_KEY = 'PIRATE_QUEST_GAME_DATA_V3';
-
-    // Remote sync handlers
-    window.getGameStatePayload = function() {
-      return {
-        teams: JSON.stringify(teams),
-
-    let cloudConfig = {
-      binId: '',
-      apiKey: ''
-    };
-
-    const LOCAL_STORAGE_KEY = 'PIRATE_QUEST_GAME_DATA_V2';
-    const CLOUD_CONFIG_KEY = 'PIRATE_QUEST_CLOUD_CFG_V2';
 
     // Remote sync handlers
     window.getGameStatePayload = function() {
@@ -1064,7 +1054,8 @@
 
     function loadFromLocalStorage() {
       try {
-        const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+        // 沿用舊版 (V2) 的本機資料，避免升級後紀錄消失
+        const raw = localStorage.getItem(LOCAL_STORAGE_KEY) || localStorage.getItem('PIRATE_QUEST_GAME_DATA_V2');
         if (raw) {
           const parsed = JSON.parse(raw);
           if (parsed.teams && parsed.teams.length > 0) teams = parsed.teams;
@@ -1171,7 +1162,7 @@
       // 1. Load GAS Web App URL if configured
       try {
         const savedUrl = localStorage.getItem(GAS_CONFIG_KEY);
-        if (savedUrl) {
+        if (savedUrl && savedUrl.includes('/exec')) {
           gasUrl = savedUrl;
           if (document.getElementById('cfg_gas_url')) {
             document.getElementById('cfg_gas_url').value = gasUrl;
@@ -1972,6 +1963,11 @@
         return;
       }
 
+      if (!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec/.test(urlInput)) {
+        showToast('網址格式不對：請貼上「部署 → 網頁應用程式」的網址，結尾必須是 /exec', 'error');
+        return;
+      }
+
       gasUrl = urlInput;
       localStorage.setItem(GAS_CONFIG_KEY, gasUrl);
       syncFromGoogleSheet(false);
@@ -2004,6 +2000,13 @@
             indicator.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span class="text-emerald-300 font-bold">試算表已連線</span>';
           }
           if (!isSilent) showToast('✅ 成功與 Google 試算表同步！', 'success');
+        } else if (json && json.status === 'success' && !json.data) {
+          // 試算表還是空的：把目前資料寫進去，完成首次建檔
+          await triggerCloudSave();
+          if (indicator) {
+            indicator.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400"></span><span class="text-emerald-300 font-bold">試算表已建檔</span>';
+          }
+          if (!isSilent) showToast('✅ 試算表首次建檔完成！', 'success');
         } else {
           throw new Error('試算表格式不符或尚無資料');
         }
