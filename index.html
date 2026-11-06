@@ -2132,6 +2132,50 @@ function doPost(e) {
       downloadAnchor.remove();
       showToast('競賽數據備份 JSON 匯出完成！', 'success');
     }
+
+    // ==========================================
+    // 14. 管理員密碼鎖 (只有管理員能改資料，其他人只能看)
+    // ==========================================
+    const ADMIN_PASSWORD_HASH = '1431ca0e0798a669aa7d7f441f7ca04a72650ef2ba10b18bd2cd03816fb0e832';
+    const ADMIN_STORAGE_KEY = 'PIRATE_QUEST_ADMIN_V1';
+
+    function isAdmin() {
+      try { return localStorage.getItem(ADMIN_STORAGE_KEY) === ADMIN_PASSWORD_HASH; } catch (e) { return false; }
+    }
+
+    async function sha256Hex(text) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function ensureAdmin() {
+      if (isAdmin()) return true;
+      const pw = prompt('🔒 此功能僅限管理員使用，請輸入密碼：');
+      if (!pw) return false;
+      if (await sha256Hex(pw.trim()) === ADMIN_PASSWORD_HASH) {
+        try { localStorage.setItem(ADMIN_STORAGE_KEY, ADMIN_PASSWORD_HASH); } catch (e) {}
+        showToast('✅ 管理員已登入，這台裝置之後不需再輸入密碼', 'success');
+        return true;
+      }
+      showToast('密碼錯誤，僅限瀏覽', 'error');
+      return false;
+    }
+
+    // 需要密碼才能使用的功能
+    ['openScoreModal', 'deleteLogEntry', 'openGachaModal', 'openCardManagementModal', 'openConfigModal', 'openGoogleSheetModal']
+      .forEach(name => {
+        const original = window[name];
+        window[name] = async function (...args) {
+          if (await ensureAdmin()) return original.apply(this, args);
+        };
+      });
+
+    // 非管理員不寫入試算表，避免舊資料覆蓋正式紀錄
+    const _originalCloudSave = triggerCloudSave;
+    triggerCloudSave = async function () {
+      if (!isAdmin()) { saveToLocalStorage(); return; }
+      return _originalCloudSave();
+    };
   </script>
 </body>
 </html>
