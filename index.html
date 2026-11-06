@@ -272,6 +272,16 @@
       .lb-row, .lb-shine { animation: none; }
     }
 
+    /* 每日戰績直接輸入格 */
+    .daily-input {
+      width: 3.2rem; padding: 4px 4px; text-align: center; border-radius: 8px;
+      background: #0b1628; border: 1px solid #334155; color: #64748b;
+      font-family: ui-monospace, monospace; font-size: 12px; transition: border-color .15s, box-shadow .15s;
+    }
+    .daily-input.has-value { color: #fde68a; border-color: rgba(245,158,11,.45); font-weight: 700; }
+    .daily-input:focus { outline: none; border-color: #fbbf24; box-shadow: 0 0 0 3px rgba(251,191,36,.25); color: #fff; }
+    .daily-input::-webkit-inner-spin-button { opacity: .4; }
+
     /* 管理員專用：非管理員完全隱藏 */
     body:not(.is-admin) .admin-only { display: none !important; }
 
@@ -534,6 +544,9 @@
       </div>
 
       <div id="dailyBoardSummary" class="flex flex-wrap gap-2 mb-3 text-[11px]"></div>
+      <div id="dailyEditHint" class="hidden mb-3 text-[11px] bg-amber-500/10 border border-amber-500/30 text-amber-200 rounded-lg px-3 py-2">
+        ✏️ 管理員模式：直接點格子輸入數字，按 <b>Enter</b> 或 <b>Tab</b> 跳下一格並自動存檔，加成與排行榜即時更新。
+      </div>
 
       <div class="overflow-x-auto rounded-xl border border-slate-700/50">
         <table class="w-full text-left text-xs text-slate-300">
@@ -2812,7 +2825,19 @@ function doPost(e) {
       tbody.innerHTML = rows.map(r => {
         const zero = r.points === 0;
         const m = r.metrics;
-        const cell = v => `<td class="py-2.5 px-3 text-center font-mono ${v ? 'text-slate-100' : 'text-slate-600'}">${v}</td>`;
+        const editable = isAdmin();
+        const cell = (k) => {
+          const v = m[k];
+          if (editable) {
+            return `<td class="py-1.5 px-1.5 text-center">
+              <input type="number" inputmode="numeric" min="0" step="1" value="${v}"
+                class="daily-input ${v ? 'has-value' : ''}"
+                data-team="${r.team.id}" data-slot="${r.slot}" data-key="${k}"
+                aria-label="${escapeHtml(r.name)} ${k}">
+            </td>`;
+          }
+          return `<td class="py-2.5 px-3 text-center font-mono ${v ? 'text-slate-100' : 'text-slate-600'}">${v}</td>`;
+        };
         const teamCell = r.slot === 'A' ? `
           <td rowspan="2" class="py-2.5 px-3 font-bold text-slate-200 align-middle border-r border-slate-800">
             <span class="inline-block w-2 h-2 rounded-full mr-1" style="background:${r.team.color}"></span>${escapeHtml(r.team.name)}
@@ -2825,13 +2850,107 @@ function doPost(e) {
           <tr class="${zero ? 'bg-slate-950/30' : 'hover:bg-slate-800/40'} ${r.slot === 'B' ? 'border-b-2 border-slate-700/70' : ''}">
             ${teamCell}
             <td class="py-2.5 px-3 ${zero ? 'text-slate-400' : 'text-amber-200 font-bold'}">${escapeHtml(r.name)}</td>
-            ${cell(m.invite)}${cell(m.attendOnline)}${cell(m.attendOffline)}${cell(m.demo)}${cell(m.deal)}
+            ${cell('invite')}${cell('attendOnline')}${cell('attendOffline')}${cell('demo')}${cell('deal')}
             <td class="py-2.5 px-3 text-right font-mono font-bold ${zero ? 'text-slate-500' : 'text-amber-300'}">${r.points}</td>
-            <td class="py-2.5 px-3 text-right font-mono ${r.penalty ? 'text-rose-300 font-bold' : 'text-slate-600'}">${r.penalty ? '−' + r.penalty + `<span class="text-[10px] text-slate-400 ml-1">(${r.lateMinutes}分)</span>` : '0'}</td>
+            <td class="py-2.5 px-3 text-right font-mono whitespace-nowrap ${r.penalty ? 'text-rose-300 font-bold' : 'text-slate-600'}">
+              ${r.penalty ? '−' + r.penalty + `<span class="text-[10px] text-slate-400 ml-1">(${r.lateMinutes}分)</span>` : '0'}
+              ${editable ? `<button type="button" onclick="quickPenalty('${r.team.id}','${r.slot}')" class="ml-1 px-1.5 py-0.5 rounded bg-cyan-900/60 hover:bg-cyan-800 text-cyan-200 text-[10px] font-sans font-bold" title="登記遲到">＋遲到</button>` : ''}
+            </td>
             ${teamTotalCell}
           </tr>`;
       }).join('');
+
+      const hint = document.getElementById('dailyEditHint');
+      if (hint) hint.classList.toggle('hidden', !isAdmin());
     }
+
+    // ===== 管理員直接在表格輸入 =====
+    // 把該隊當天的紀錄合併成一筆，套用修改後重新計算同心協力與結算
+    function commitDailyEdit(teamId, slot, key, rawValue, date) {
+      const value = Math.max(0, Math.floor(Number(rawValue) || 0));
+      const memberKey = slot === 'A' ? 'm1' : 'm2';
+      const dayLogs = scoreLogs.filter(l => l.date === date && l.teamId === teamId);
+
+      const merged = { m1: {}, m2: {} };
+      METRIC_KEYS.forEach(k => {
+        merged.m1[k] = dayLogs.reduce((s, l) => s + (Number(l.m1?.[k]) || 0), 0);
+        merged.m2[k] = dayLogs.reduce((s, l) => s + (Number(l.m2?.[k]) || 0), 0);
+      });
+      if (merged[memberKey][key] === value && dayLogs.length) return false;
+      merged[memberKey][key] = value;
+
+      const ptsA = calculateMemberPoints(merged.m1);
+      const ptsB = calculateMemberPoints(merged.m2);
+      const isCombo = hasMemberContributed(merged.m1) && hasMemberContributed(merged.m2);
+      const baseTotal = ptsA + ptsB;
+      const finalScore = isCombo ? Math.round(baseTotal * 1.2 * 10) / 10 : baseTotal;
+
+      const keepId = dayLogs[0]?.id || ('log-' + Date.now());
+      scoreLogs = scoreLogs.filter(l => !(l.date === date && l.teamId === teamId));
+      scoreLogs.push({
+        id: keepId, date, teamId,
+        m1: merged.m1, m2: merged.m2,
+        comboTriggered: isCombo, baseTotal, finalScore,
+        editedAt: new Date().toISOString()
+      });
+      return true;
+    }
+
+    let dailySaveTimer = null;
+    function handleDailyInputChange(input) {
+      if (!isAdmin()) { renderDailyBoard(); return; }
+      const date = document.getElementById('dailyViewDate').value;
+      const changed = commitDailyEdit(input.dataset.team, input.dataset.slot, input.dataset.key, input.value, date);
+      if (!changed) return;
+
+      // 等焦點移到下一格後再重繪，並把游標放回原位
+      setTimeout(() => {
+        const active = document.activeElement;
+        const focusKey = active && active.classList.contains('daily-input')
+          ? `[data-team="${active.dataset.team}"][data-slot="${active.dataset.slot}"][data-key="${active.dataset.key}"]` : null;
+        renderAll();
+        if (focusKey) {
+          const next = document.querySelector('#dailyBoardBody .daily-input' + focusKey);
+          if (next) { next.focus(); next.select(); }
+        }
+        const team = teams.find(t => t.id === input.dataset.team);
+        showToast(`✅ 已更新 ${team ? team.name : ''}`, 'success');
+      }, 0);
+
+      // 連續輸入時合併成一次雲端存檔
+      clearTimeout(dailySaveTimer);
+      dailySaveTimer = setTimeout(() => triggerCloudSave(), 800);
+    }
+
+    async function quickPenalty(teamId, slot) {
+      const date = document.getElementById('dailyViewDate').value;
+      await openPenaltyModal();
+      document.getElementById('penaltyDate').value = date;
+      document.getElementById('penaltyTeamId').value = teamId;
+      updatePenaltyMemberOptions();
+      document.getElementById('penaltyMember').value = slot;
+      setTimeout(() => document.getElementById('penaltyMinutes').focus(), 50);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const tbody = document.getElementById('dailyBoardBody');
+      if (!tbody) return;
+      tbody.addEventListener('change', e => {
+        if (e.target.classList.contains('daily-input')) handleDailyInputChange(e.target);
+      });
+      tbody.addEventListener('focusin', e => {
+        if (e.target.classList.contains('daily-input')) e.target.select();
+      });
+      tbody.addEventListener('keydown', e => {
+        if (e.target.classList.contains('daily-input') && e.key === 'Enter') {
+          e.preventDefault();
+          const inputs = [...tbody.querySelectorAll('.daily-input')];
+          const i = inputs.indexOf(e.target);
+          (inputs[i + 1] || e.target).focus();
+          if (!inputs[i + 1]) e.target.blur();
+        }
+      });
+    });
 
     function shiftDailyDate(delta) {
       const input = document.getElementById('dailyViewDate');
@@ -2951,6 +3070,7 @@ function doPost(e) {
     function applyAdminUI() {
       const admin = isAdmin();
       document.body.classList.toggle('is-admin', admin);
+      if (typeof renderDailyBoard === 'function' && document.getElementById('dailyViewDate')?.value) renderDailyBoard();
       const btn = document.getElementById('adminToggleBtn');
       if (btn) {
         btn.title = admin ? '管理員已登入（點擊登出）' : '管理員登入';
@@ -2974,7 +3094,7 @@ function doPost(e) {
 
     // 需要密碼才能使用的功能（雙重保險：按鈕已對訪客隱藏）
     ['openScoreModal', 'deleteLogEntry', 'openGachaModal', 'openCardManagementModal', 'openConfigModal', 'openGoogleSheetModal',
-     'openDeployModal', 'openPenaltyModal', 'deletePenaltyEntry', 'openMarqueeModal', 'saveMarquee']
+     'openDeployModal', 'openPenaltyModal', 'deletePenaltyEntry', 'openMarqueeModal', 'saveMarquee', 'quickPenalty']
       .forEach(name => {
         const original = window[name];
         window[name] = async function (...args) {
