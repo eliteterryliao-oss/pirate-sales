@@ -358,7 +358,7 @@
           <i class="fa-solid fa-cloud-arrow-up"></i>
           <span>部署上線</span>
         </button>
-        <button onclick="openConfigModal()" class="admin-only p-2 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 rounded-xl transition" title="組別與競賽設定">
+        <button onclick="openConfigModal()" class="admin-only p-2 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 rounded-xl transition" title="競賽設定（目標點數、戰隊名單）">
           <i class="fa-solid fa-sliders text-base"></i>
         </button>
         <button id="adminToggleBtn" onclick="toggleAdminLogin()" class="p-2 bg-slate-800/70 hover:bg-slate-700 text-slate-400 border border-slate-700 rounded-xl transition" title="管理員登入">
@@ -407,14 +407,14 @@
             <i class="fa-solid fa-map-location-dot text-amber-400"></i>
             七大海盜船進度航道 (Nautical Track)
           </h2>
-          <p class="text-xs text-slate-400">航程終點為「傳奇黃金島（100點）」，即時隨各隊積分向前巡弋</p>
+          <p class="text-xs text-slate-400">航程終點為「傳奇黃金島（<span class="goal-num">100</span> 點）」，即時隨各隊積分向前巡弋</p>
         </div>
         <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-300">
           <span>⚓ 啟航港 0</span>
-          <span>🪸 珊瑚礁 25</span>
-          <span>🌀 暴風眼 50</span>
-          <span>🦈 鯊魚海域 75</span>
-          <span>🏝️ 黃金島 100</span>
+          <span>🪸 珊瑚礁 <span class="goal-q1">25</span></span>
+          <span>🌀 暴風眼 <span class="goal-q2">50</span></span>
+          <span>🦈 鯊魚海域 <span class="goal-q3">75</span></span>
+          <span>🏝️ 黃金島 <span class="goal-num">100</span></span>
         </div>
       </div>
 
@@ -936,7 +936,7 @@
             <i class="fa-solid fa-users-gear text-lg"></i>
           </div>
           <div>
-            <h3 class="text-base sm:text-lg font-bold text-amber-300">戰隊編制與成員設定 (7 隊 14 人)</h3>
+            <h3 class="text-base sm:text-lg font-bold text-amber-300">競賽設定與戰隊編制</h3>
             <p class="text-xs text-slate-400">自訂隊伍船名、隊員真實姓名與標誌色</p>
           </div>
         </div>
@@ -1040,7 +1040,7 @@
 
         <section>
           <h4 class="font-bold text-amber-300 mb-2 flex items-center gap-2"><i class="fa-solid fa-flag-checkered"></i> 六、航程終點</h4>
-          <p>率先抵達 <strong class="text-amber-200">傳奇黃金島（100 點）</strong> 的戰隊即為航海霸主。</p>
+          <p>率先抵達 <strong class="text-amber-200">傳奇黃金島（<span class="goal-num">100</span> 點）</strong> 的戰隊即為航海霸主。</p>
         </section>
       </div>
 
@@ -1372,6 +1372,9 @@
     let cardsInventory = []; // { id, cardId, teamId, dateDrawn, scheduledDate, status: 'held' | 'scheduled' | 'used', targetTeamId }
     let penaltyLogs = []; // 海嘯扣分紀錄 { id, date, teamId, member, memberName, minutes, points, note, createdAt }
     let marqueeText = ''; // 跑馬燈公告
+    let goalPoints = 100; // 黃金島總目標點數（可在設定中修改）
+    function getGoal() { const g = Number(goalPoints); return g > 0 ? g : 100; }
+    function fmtGoal(v) { return Number.isInteger(v) ? String(v) : v.toFixed(1); }
 
     // Google Sheets Direct Connect Configuration
     // ▼▼▼ 把 Apps Script「網頁應用程式」網址 (結尾是 /exec) 貼在下面引號內 ▼▼▼
@@ -1389,6 +1392,7 @@
         cardsInventory: JSON.stringify(cardsInventory),
         penaltyLogs: JSON.stringify(penaltyLogs),
         marqueeText,
+        goalPoints,
         updatedAt: new Date().toISOString()
       };
     };
@@ -1400,6 +1404,7 @@
         if (remote.cardsInventory) cardsInventory = typeof remote.cardsInventory === 'string' ? JSON.parse(remote.cardsInventory) : remote.cardsInventory;
         if (remote.penaltyLogs) penaltyLogs = typeof remote.penaltyLogs === 'string' ? JSON.parse(remote.penaltyLogs) : remote.penaltyLogs;
         if (typeof remote.marqueeText === 'string') marqueeText = remote.marqueeText;
+        if (Number(remote.goalPoints) > 0) goalPoints = Number(remote.goalPoints);
         
         saveToLocalStorage();
         populateTeamSelects();
@@ -1418,6 +1423,7 @@
           cardsInventory,
           penaltyLogs,
           marqueeText,
+          goalPoints,
           lastSaved: new Date().toISOString()
         };
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(payload));
@@ -1437,6 +1443,7 @@
           if (parsed.cardsInventory) cardsInventory = parsed.cardsInventory;
           if (Array.isArray(parsed.penaltyLogs)) penaltyLogs = parsed.penaltyLogs;
           if (typeof parsed.marqueeText === 'string') marqueeText = parsed.marqueeText;
+          if (Number(parsed.goalPoints) > 0) goalPoints = Number(parsed.goalPoints);
           return true;
         }
       } catch (e) {
@@ -1474,6 +1481,7 @@
                 cardsInventory,
                 penaltyLogs,
                 marqueeText,
+                goalPoints,
                 updatedAt: new Date().toISOString()
               }
             })
@@ -1579,6 +1587,7 @@
       renderPenaltyLogs();
       renderDailyBoard();
       renderMarquee();
+      updateGoalLabels();
       updateGachaEligibilityIndicator();
     }
 
@@ -1680,7 +1689,8 @@
         stats: getTeamStats(t.id)
       })).sort((a, b) => b.stats.totalScore - a.stats.totalScore);
 
-      const targetGoal = 100; // 抵達傳奇黃金島
+      const targetGoal = getGoal(); // 抵達傳奇黃金島（可自訂）
+      const q = f => fmtGoal(Math.round(targetGoal * f * 10) / 10);
       const animateIn = !nauticalMapRendered;
       nauticalMapRendered = true;
 
@@ -1702,7 +1712,7 @@
                 <span class="text-[11px] text-cyan-100/60 hidden sm:inline">(${escapeHtml(team.memberA)} & ${escapeHtml(team.memberB)})</span>
               </div>
               <div class="font-mono font-bold ${score < 0 ? 'text-rose-300' : 'text-amber-300'}">
-                ${score.toFixed(1)} <span class="text-[10px] text-cyan-100/50">/ 100 點</span>
+                ${score.toFixed(1)} <span class="text-[10px] text-cyan-100/50">/ ${fmtGoal(targetGoal)} 點</span>
                 ${arrived ? '<span class="ml-1 text-amber-300">🏆 已登島</span>' : ''}
               </div>
             </div>
@@ -1715,9 +1725,9 @@
               <div class="absolute inset-y-0 left-6 right-12 sm:left-8 sm:right-16">
                 <!-- 地標 -->
                 <div class="lane-mark" style="left:0%"><span>⚓</span></div>
-                <div class="lane-mark" style="left:25%"><span>🪸</span><em>25</em></div>
-                <div class="lane-mark" style="left:50%"><span>🌀</span><em>50</em></div>
-                <div class="lane-mark" style="left:75%"><span>🦈</span><em>75</em></div>
+                <div class="lane-mark" style="left:25%"><span>🪸</span><em>${q(0.25)}</em></div>
+                <div class="lane-mark" style="left:50%"><span>🌀</span><em>${q(0.5)}</em></div>
+                <div class="lane-mark" style="left:75%"><span>🦈</span><em>${q(0.75)}</em></div>
 
                 <!-- 航跡 -->
                 <div class="ship-wake absolute bottom-[14px] left-0 h-2.5 rounded-full"
@@ -1733,7 +1743,7 @@
               </div>
 
               <!-- 終點黃金島 -->
-              <div class="absolute right-1 sm:right-2 bottom-1 text-2xl sm:text-3xl select-none ${arrived ? 'gold-island-glow' : ''}" title="傳奇黃金島 (100 點)">🏝️</div>
+              <div class="absolute right-1 sm:right-2 bottom-1 text-2xl sm:text-3xl select-none ${arrived ? 'gold-island-glow' : ''}" title="傳奇黃金島 (${fmtGoal(targetGoal)} 點)">🏝️</div>
             </div>
           </div>
         `;
@@ -1794,7 +1804,7 @@
         const score = team.stats.totalScore;
         const tier = score > 0 ? tiers[rankIndex] : null;
         const isLeader = rankIndex === 0 && score > 0;
-        const progress = Math.min(100, Math.max(0, score));
+        const progress = Math.min(100, Math.max(0, score / getGoal() * 100));
         const sailedToday = scoreLogs.some(l => l.teamId === team.id && l.date === today);
 
         const a = Math.max(0, team.stats.memberAScore), b = Math.max(0, team.stats.memberBScore);
@@ -1858,7 +1868,7 @@
               <div class="text-right ml-auto shrink-0 w-[68px] sm:w-[92px]">
                 <div class="lb-score text-xl sm:text-3xl font-black font-mono leading-none ${score < 0 ? 'text-rose-300' : ''}" data-team="${team.id}">${score.toFixed(1)}</div>
                 <div class="text-[10px] text-slate-400 mt-1">${motto}</div>
-                <div class="mt-1.5 h-1 w-full rounded-full bg-slate-800 overflow-hidden" title="距黃金島 ${Math.max(0, 100 - score).toFixed(1)} 點">
+                <div class="mt-1.5 h-1 w-full rounded-full bg-slate-800 overflow-hidden" title="距黃金島 ${Math.max(0, getGoal() - score).toFixed(1)} 點">
                   <div class="h-full rounded-full" style="width:${progress}%;background:linear-gradient(90deg,${team.color}88,${team.color})"></div>
                 </div>
               </div>
@@ -2354,7 +2364,18 @@
     // ==========================================
     function openConfigModal() {
       const container = document.getElementById('teamConfigList');
-      container.innerHTML = '';
+      container.innerHTML = `
+        <div class="bg-gradient-to-r from-amber-900/40 to-ocean-950 p-4 rounded-xl border border-amber-500/50">
+          <label for="cfg_goal_points" class="flex items-center gap-2 text-sm font-bold text-amber-300 mb-1">🏝️ 黃金島總目標點數</label>
+          <p class="text-[11px] text-slate-400 mb-2">航道終點、沿途地標（25% / 50% / 75%）與排行榜進度條都會依此計算</p>
+          <div class="flex flex-wrap items-center gap-2">
+            <input type="number" id="cfg_goal_points" min="1" step="1" value="${getGoal()}" class="w-32 bg-slate-900 border border-amber-500/50 focus:border-amber-300 rounded-lg px-3 py-2 text-base font-bold font-mono text-amber-200 focus:outline-none">
+            <span class="text-xs text-slate-400">點</span>
+            <div class="flex gap-1 ml-auto">
+              ${[100, 150, 200, 300].map(v => `<button type="button" onclick="document.getElementById('cfg_goal_points').value=${v}" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] text-slate-200 font-mono">${v}</button>`).join('')}
+            </div>
+          </div>
+        </div>`;
 
       teams.forEach((t, i) => {
         const itemHtml = `
@@ -2390,6 +2411,16 @@
     }
 
     function saveTeamConfigs() {
+      const goalInput = document.getElementById('cfg_goal_points');
+      if (goalInput) {
+        const g = Math.round(Number(goalInput.value) * 10) / 10;
+        if (!(g > 0)) {
+          showToast('總目標點數必須大於 0', 'error');
+          return;
+        }
+        goalPoints = g;
+      }
+
       teams.forEach(t => {
         const nameInput = document.getElementById(`cfg_name_${t.id}`);
         const m1Input = document.getElementById(`cfg_m1_${t.id}`);
@@ -2406,7 +2437,7 @@
       renderAll();
       closeConfigModal();
       triggerCloudSave();
-      showToast('戰隊名冊與編制設定已儲存！', 'success');
+      showToast(`設定已儲存！黃金島目標：${fmtGoal(getGoal())} 點`, 'success');
     }
 
     function resetDefaultTeams() {
@@ -2500,6 +2531,7 @@
           if (remoteData.cardsInventory) cardsInventory = remoteData.cardsInventory;
           if (Array.isArray(remoteData.penaltyLogs)) penaltyLogs = remoteData.penaltyLogs;
           if (typeof remoteData.marqueeText === 'string') marqueeText = remoteData.marqueeText;
+          if (Number(remoteData.goalPoints) > 0) goalPoints = Number(remoteData.goalPoints);
 
           saveToLocalStorage();
           populateTeamSelects();
@@ -2632,7 +2664,8 @@ function doPost(e) {
         scoreLogs,
         cardsInventory,
         penaltyLogs,
-        marqueeText
+        marqueeText,
+        goalPoints
       };
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataPayload, null, 2));
       const downloadAnchor = document.createElement('a');
@@ -2765,6 +2798,15 @@ function doPost(e) {
             </td>
           </tr>`;
       }).join('');
+    }
+
+    function updateGoalLabels() {
+      const g = getGoal();
+      const q = f => fmtGoal(Math.round(g * f * 10) / 10);
+      document.querySelectorAll('.goal-num').forEach(el => el.textContent = fmtGoal(g));
+      document.querySelectorAll('.goal-q1').forEach(el => el.textContent = q(0.25));
+      document.querySelectorAll('.goal-q2').forEach(el => el.textContent = q(0.5));
+      document.querySelectorAll('.goal-q3').forEach(el => el.textContent = q(0.75));
     }
 
     // ==========================================
